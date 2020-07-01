@@ -1,0 +1,13 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+	
+	<Preference
+		app:fragment="dev.defvs.chatterz.settings.SettingsActivity$ThemeFragment"
+		app:icon="@drawable/ic_brush_24"
+		app:key="themes_header"
+		app:title="@string/theme_header" />
+
+	<Preference
+		app:fragment="dev.defvs.chatterz.settings.SettingsActivity$DebugFragment"
+		app:key="debug_header"
+		app:title="@string/debug_header" />
+</PreferenceScreen>

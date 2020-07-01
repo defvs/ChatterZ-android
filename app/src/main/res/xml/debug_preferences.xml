@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto">
+	<EditTextPreference
+		app:defaultValue=""
+		app:key="twitch_token"
+		android:selectAllOnFocus="true"
+		android:singleLine="true"
+		app:title="@string/settings_twitch_token" />
+	
+	<EditTextPreference
+		app:defaultValue=""
+		app:key="twitch_username"
+		android:selectAllOnFocus="true"
+		android:singleLine="true"
+		app:title="Twitch Username" />
+	
+	<EditTextPreference
+		app:defaultValue=""
+		app:key="twitch_default_channel"
+		android:selectAllOnFocus="true"
+		android:singleLine="true"
+		app:title="Default Channel" />
+</PreferenceScreen>
