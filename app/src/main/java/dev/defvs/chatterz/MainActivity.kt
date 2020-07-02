@@ -1,9 +1,11 @@
 package dev.defvs.chatterz
 
+import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.view.inputmethod.EditorInfo
 import android.widget.TextView
@@ -16,8 +18,10 @@ import dev.defvs.chatterz.twitch.ChatClient
 import dev.defvs.chatterz.twitch.TwitchMessage
 import io.multimoon.colorful.Colorful
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import dev.defvs.chatterz.MainActivity.Companion.sharedPreferences as preferences
 
 class MainActivity : ThemedActivity() {
@@ -31,6 +35,11 @@ class MainActivity : ThemedActivity() {
 		SharedPreferences.OnSharedPreferenceChangeListener { _, s ->
 			when (s) {
 				"checkered_lines" -> redrawChat()
+				"dark_theme" -> Colorful().edit()
+					.setDarkTheme(sharedPreferences.getBoolean("dark_theme", true))
+					.apply(this) {
+						this.recreate()
+					}
 			}
 		}
 	
@@ -48,7 +57,7 @@ class MainActivity : ThemedActivity() {
 		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
 		
 		chatViewManager = LinearLayoutManager(this)
-		chatViewAdapter = ChatAdapter(messages)
+		chatViewAdapter = ChatAdapter(messages, this)
 		chatRecyclerView = chatRecycler.apply {
 			setHasFixedSize(true)
 			descendantFocusability
@@ -139,7 +148,7 @@ class MainActivity : ThemedActivity() {
 	}
 }
 
-class ChatAdapter(private val messages: ArrayList<TwitchMessage>) :
+class ChatAdapter(private val messages: ArrayList<TwitchMessage>, private val context: Context) :
 	RecyclerView.Adapter<ChatAdapter.ViewHolder>() {
 	
 	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
@@ -152,15 +161,17 @@ class ChatAdapter(private val messages: ArrayList<TwitchMessage>) :
 	
 	override fun onBindViewHolder(holder: ViewHolder, i: Int) {
 		with(messages[i]) {
-			holder.senderText.text = sender.displayName ?: sender.username
-			if (sender.color == null)
-				holder.senderText.setTextColor(holder.messageText.textColors)
-			else sender.color!!.let {
-				holder.senderText.setTextColor(
-					if (Colorful().getDarkTheme()) it.lightenColor() else it.darkenColor()
-				)
+			holder.messageText.text = "$sender: $message"
+			GlobalScope.launch {
+				try {
+					val spannable = this@with.getMessageSpannable(context)
+					withContext(Dispatchers.Main) {
+						holder.messageText.text = spannable
+					}
+				} catch (e: Exception) {
+					Log.w("SpannableLoader", "Emotes and badges load failed", e)
+				}
 			}
-			holder.messageText.text = message
 			if (i % 2 == 0 && preferences.getBoolean("checkered_lines", false))
 				holder.itemView.setBackgroundColor(
 					Color.parseColor(
@@ -173,7 +184,6 @@ class ChatAdapter(private val messages: ArrayList<TwitchMessage>) :
 	}
 	
 	class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-		val senderText: TextView = view.findViewById(R.id.chatSender)
 		val messageText: TextView = view.findViewById(R.id.chatMessage)
 	}
 	

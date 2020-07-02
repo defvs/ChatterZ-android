@@ -1,16 +1,30 @@
 package dev.defvs.chatterz.settings
 
+import android.content.SharedPreferences
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import dev.defvs.chatterz.MainActivity
 import dev.defvs.chatterz.R
+import dev.defvs.chatterz.themes.ThemedActivity
+import io.multimoon.colorful.Colorful
 import kotlinx.android.synthetic.main.settings_activity.*
 
 private const val TITLE_TAG = "settingsActivityTitle"
 
-class SettingsActivity : AppCompatActivity(),
+class SettingsActivity : ThemedActivity(),
 	PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
+	
+	private val sharedPreferencesListener =
+		SharedPreferences.OnSharedPreferenceChangeListener { _, s ->
+			when (s) {
+				"dark_theme" -> Colorful().edit()
+					.setDarkTheme(MainActivity.sharedPreferences.getBoolean("dark_theme", true))
+					.apply(this) {
+						this.recreate()
+					}
+			}
+		}
 	
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
@@ -33,6 +47,10 @@ class SettingsActivity : AppCompatActivity(),
 			}
 		}
 		supportActionBar?.setDisplayHomeAsUpEnabled(true)
+		
+		MainActivity.sharedPreferences.registerOnSharedPreferenceChangeListener(
+			sharedPreferencesListener
+		)
 	}
 	
 	override fun onSaveInstanceState(outState: Bundle) {

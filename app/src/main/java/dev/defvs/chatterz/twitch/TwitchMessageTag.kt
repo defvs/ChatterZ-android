@@ -4,8 +4,16 @@ import android.content.Context
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
-import java.io.IOException
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.SpannableStringBuilder
+import android.text.style.ImageSpan
+import androidx.core.content.ContextCompat
+import androidx.core.text.set
+import androidx.core.text.toSpannable
+import dev.defvs.chatterz.R
 import java.net.URL
+
 
 open class TwitchMessageTag(
 	open val name: String,
@@ -13,7 +21,8 @@ open class TwitchMessageTag(
 ) {
 	companion object {
 		fun parseTags(tagMessage: String): List<TwitchMessageTag> =
-			tagMessage.substringBefore(":").substringAfter('@').trim().split(';')
+			tagMessage.substringBefore("tmi.twitch.tv").substringBeforeLast(":").substringAfter('@')
+				.trim().split(';')
 				.map { TwitchMessageTag(it.substringBefore('='), it.substringAfter('=')) }
 	}
 	
@@ -26,9 +35,32 @@ data class Badges(
 	val badges: List<Badge>
 		get() = data.split(',')
 			.map { Badge(it.substringBefore('/'), it.substringAfter('/')) }
+	
+	fun getBadgedSpannable(context: Context, sender: String): Spannable {
+		val builder = SpannableStringBuilder()
+		badges.forEach { badge ->
+			badge.getBadgeDrawable(context)?.let {
+				builder.append("${badge.name.substring(0..2)} ")
+				val range = builder.indexOf(badge.name.substring(0..2)).let { it..(it + 3) }
+				builder[range] = ImageSpan(it)
+			}
+		}
+		builder.append(sender)
+		
+		return builder.toSpannable()
+	}
 }
 
-data class Badge(val name: String, val version: String)
+data class Badge(val name: String, val version: String? = null, val imageUrl: String? = null) {
+	fun getBadgeDrawable(context: Context) = when (name) {
+		"moderator" -> ContextCompat.getDrawable(context, R.drawable.ic_moderator_24)
+		"vip" -> ContextCompat.getDrawable(context, R.drawable.ic_star_24)
+		"subscriber", "founder" -> ContextCompat.getDrawable(context, R.drawable.ic_subscriber_24)
+		else -> null
+	}?.apply {
+		setBounds(0, 0, 48, 48)
+	}
+}
 
 data class Emotes(
 	override val data: String
@@ -36,14 +68,14 @@ data class Emotes(
 	val emotes: ArrayList<Emote>
 		get() {
 			val emotes = arrayListOf<Emote>()
+			if (data.isBlank()) return emotes
 			
 			data.split('/').forEach {
-				val id = it.substringBefore(':').toInt()
+				val id = it.substringBefore(':')
 				it.substringAfter(':').split(',').let {
 					it.forEach {
 						emotes.add(
 							Emote(
-								"",
 								id,
 								it.substringBefore('-').toInt(),
 								it.substringAfter('-').toInt()
@@ -55,19 +87,46 @@ data class Emotes(
 			
 			return emotes
 		}
+	
+	suspend fun getEmotedSpannable(context: Context, message: TwitchMessage) =
+		getEmotedSpannable(context, SpannableString(message.message))
+	
+	suspend fun getEmotedSpannable(context: Context, spannable: Spannable): Spannable {
+		emotes.forEach {
+			val emote = it.loadDrawable(context)
+			val image = ImageSpan(emote, ImageSpan.ALIGN_BASELINE)
+			spannable.setSpan(
+				image,
+				it.positionStart,
+				it.positionEnd + 1,
+				Spannable.SPAN_INCLUSIVE_EXCLUSIVE
+			)
+		}
+		return spannable
+	}
 }
 
 data class Emote(
-	val name: String,
-	val id: Int,
+	val id: String,
 	val positionStart: Int,
 	val positionEnd: Int
 ) {
-	suspend fun loadDrawable(context: Context, size: Int = 3): BitmapDrawable {
-		// TODO : cache bitmaps
-		val url = URL("http://static-cdn.jtvnw.net/emoticons/v1/$id/${size.coerceIn(1..3)}.0")
-		val bitmap = BitmapFactory.decodeStream(url.openStream())
-		return BitmapDrawable(context.resources, bitmap)
+	suspend fun loadDrawable(
+		context: Context,
+		size: Int = 2
+	): BitmapDrawable {
+		// TODO: cache
+		val url = URL("https://static-cdn.jtvnw.net/emoticons/v1/$id/${size.coerceIn(1..3)}.0")
+		val bitmap = BitmapFactory.decodeStream(url.openConnection().apply { useCaches = true }
+			.getInputStream())
+		return BitmapDrawable(context.resources, bitmap).apply {
+			setBounds(
+				0,
+				0,
+				bitmap.width,
+				bitmap.height
+			)
+		}
 	}
 }
 

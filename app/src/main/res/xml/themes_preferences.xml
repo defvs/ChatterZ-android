@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
 	<SwitchPreferenceCompat
 		app:key="checkered_lines"
+		app:defaultValue="false"
 		app:title="@string/preferences_checkered_lines" />
+	<SwitchPreferenceCompat
+		app:defaultValue="true"
+		app:key="dark_theme"
+		app:title="@string/preferences_dark_theme" />
 </PreferenceScreen>
