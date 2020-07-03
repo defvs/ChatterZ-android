@@ -89,6 +89,42 @@ class MainActivity : ThemedActivity() {
 		sharedPreferences.registerOnSharedPreferenceChangeListener(sharedPreferencesListener)
 	}
 	
+	override fun onSaveInstanceState(outState: Bundle) {
+		outState.run {
+			putParcelableArrayList("messages", messages)
+		}
+		
+		super.onSaveInstanceState(outState)
+	}
+	
+	override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+		savedInstanceState.getParcelableArrayList<TwitchMessage>("messages")?.let {
+			messages.addAll(it)
+		}
+		
+		super.onRestoreInstanceState(savedInstanceState)
+	}
+	
+	override fun onStop() {
+		chatClient?.shutdown()
+		super.onStop()
+	}
+	
+	override fun onRestart() {
+		super.onRestart()
+		chatClient?.connect()
+	}
+	
+	override fun onDestroy() {
+		chatClient?.shutdown()
+		super.onDestroy()
+	}
+	
+	override fun onResume() {
+		super.onResume()
+		chatClient?.connect()
+	}
+	
 	override fun onCreateOptionsMenu(menu: Menu?): Boolean {
 		menuInflater.inflate(R.menu.main_menu, menu)
 		return true

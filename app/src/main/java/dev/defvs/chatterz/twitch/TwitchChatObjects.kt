@@ -1,6 +1,8 @@
 package dev.defvs.chatterz.twitch
 
 import android.content.Context
+import android.os.Parcel
+import android.os.Parcelable
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import androidx.core.text.bold
@@ -9,13 +11,23 @@ import androidx.core.text.toSpannable
 import dev.defvs.chatterz.darkenColor
 import dev.defvs.chatterz.lightenColor
 import io.multimoon.colorful.Colorful
+import kotlinx.android.parcel.Parcelize
 
 data class TwitchMessage(
 	val sender: TwitchUser,
 	var message: String,
 	val tags: List<TwitchMessageTag>
-) {
-	val isAction: Boolean
+) : Parcelable {
+	var isAction: Boolean
+	
+	constructor(parcel: Parcel) : this(
+		parcel.readParcelable<TwitchUser>(TwitchUser::class.java.classLoader) ?: TwitchUser(""),
+		parcel.readString() ?: "",
+		parcel.readParcelableArray(TwitchMessageTag::class.java.classLoader)!!
+			.toList() as? List<TwitchMessageTag> ?: listOf()
+	) {
+		isAction = parcel.readByte() != 0.toByte()
+	}
 	
 	constructor(sender: String, message: String) : this(TwitchUser(sender), message, listOf())
 	
@@ -51,12 +63,14 @@ data class TwitchMessage(
 						)
 					}
 				}
-			else spannable.append(
-				badges.getBadgedSpannable(
-					context,
-					sender.displayName ?: sender.username
+			else spannable.bold {
+				append(
+					badges.getBadgedSpannable(
+						context,
+						sender.displayName ?: sender.username
+					)
 				)
-			)
+			}
 		} ?: spannable.append(sender.displayName ?: sender.username)
 		spannable.append(": ")
 		tags.find { it.name == "emotes" }?.data?.let { Emotes(it) }?.let { emotes ->
@@ -68,11 +82,33 @@ data class TwitchMessage(
 		
 		return spannable.toSpannable()
 	}
+	
+	override fun writeToParcel(parcel: Parcel, flags: Int) {
+		parcel.writeParcelable(sender, Parcelable.PARCELABLE_WRITE_RETURN_VALUE)
+		parcel.writeString(message)
+		parcel.writeParcelableArray(tags.toTypedArray(), Parcelable.PARCELABLE_WRITE_RETURN_VALUE)
+		parcel.writeByte(if (isAction) 1 else 0)
+	}
+	
+	override fun describeContents(): Int {
+		return 0
+	}
+	
+	companion object CREATOR : Parcelable.Creator<TwitchMessage> {
+		override fun createFromParcel(parcel: Parcel): TwitchMessage {
+			return TwitchMessage(parcel)
+		}
+		
+		override fun newArray(size: Int): Array<TwitchMessage?> {
+			return arrayOfNulls(size)
+		}
+	}
 }
 
+@Parcelize
 data class TwitchUser(
 	val username: String
-) {
+) : Parcelable {
 	var isMod: Boolean = false
 	var color: Int? = null
 	var displayName: String? = null

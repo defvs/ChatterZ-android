@@ -61,7 +61,6 @@ class ChatClient(
 	
 	override fun onDisconnect() {
 		disconnectedEvent?.invoke()
-		connect()
 	}
 	
 	fun sendMessage(message: String) = sendLine("PRIVMSG $ircChannel :$message")
