@@ -3,6 +3,7 @@ package dev.defvs.chatterz.twitch
 import android.content.Context
 import android.text.Spannable
 import android.text.SpannableStringBuilder
+import androidx.core.text.bold
 import androidx.core.text.color
 import androidx.core.text.toSpannable
 import dev.defvs.chatterz.darkenColor
@@ -40,13 +41,15 @@ data class TwitchMessage(
 			if (Colorful().getDarkTheme()) sender.color?.lightenColor() else sender.color?.darkenColor()
 		tags.find { it.name == "badges" }?.data?.let { Badges(it) }?.let { badges ->
 			if (color != null)
-				spannable.color(color) {
-					append(
-						badges.getBadgedSpannable(
-							context,
-							sender.displayName ?: sender.username
+				spannable.bold {
+					color(color) {
+						append(
+							badges.getBadgedSpannable(
+								context,
+								sender.displayName ?: sender.username
+							)
 						)
-					)
+					}
 				}
 			else spannable.append(
 				badges.getBadgedSpannable(
@@ -81,6 +84,7 @@ data class TwitchUser(
 	fun fromTags(tags: List<TwitchMessageTag>) {
 		isMod = tags.find { it.name == "mod" }?.data?.let { Mod(it).isMod } ?: false
 		color = tags.find { it.name == "color" }?.data?.let { Color(it).color }
-		displayName = tags.find { it.name == "display-name" }?.data?.let { DisplayName(it).displayName }
+		displayName =
+			tags.find { it.name == "display-name" }?.data?.let { DisplayName(it).displayName }
 	}
 }
