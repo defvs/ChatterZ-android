@@ -12,6 +12,7 @@ import android.widget.TextView
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import dev.defvs.chatterz.MainActivity.Companion.chatClient
 import dev.defvs.chatterz.settings.SettingsActivity
 import dev.defvs.chatterz.themes.ThemedActivity
 import dev.defvs.chatterz.twitch.ChatClient
@@ -28,8 +29,6 @@ class MainActivity : ThemedActivity() {
 	private lateinit var chatRecyclerView: RecyclerView
 	private lateinit var chatViewAdapter: RecyclerView.Adapter<*>
 	private lateinit var chatViewManager: RecyclerView.LayoutManager
-	
-	private var chatClient: ChatClient? = null
 	
 	private val sharedPreferencesListener =
 		SharedPreferences.OnSharedPreferenceChangeListener { _, s ->
@@ -146,7 +145,12 @@ class MainActivity : ThemedActivity() {
 				GlobalScope.launch {
 					chatClient?.shutdown()
 					
-					chatClient = ChatClient(username, token, channel).apply {
+					chatClient = ChatClient(
+						username,
+						token,
+						resources.getString(R.string.twitch_client_id),
+						channel
+					).apply {
 						messageReceivedEvent = {
 							runOnUiThread {
 								onMessage(it)
@@ -181,6 +185,8 @@ class MainActivity : ThemedActivity() {
 	
 	companion object {
 		lateinit var sharedPreferences: SharedPreferences
+		
+		var chatClient: ChatClient? = null
 	}
 }
 
@@ -200,9 +206,9 @@ class ChatAdapter(private val messages: ArrayList<TwitchMessage>, private val co
 			holder.messageText.text = "$sender: $message"
 			GlobalScope.launch {
 				try {
-					val spannable = this@with.getMessageSpannable(context)
+					val spannable = chatClient?.getMessageSpannable(context, this@with)
 					withContext(Dispatchers.Main) {
-						holder.messageText.text = spannable
+						spannable?.let { holder.messageText.text = it }
 					}
 				} catch (e: Exception) {
 					Log.w("SpannableLoader", "Emotes and badges load failed", e)

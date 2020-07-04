@@ -1,16 +1,7 @@
 package dev.defvs.chatterz.twitch
 
-import android.content.Context
 import android.os.Parcel
 import android.os.Parcelable
-import android.text.Spannable
-import android.text.SpannableStringBuilder
-import androidx.core.text.bold
-import androidx.core.text.color
-import androidx.core.text.toSpannable
-import dev.defvs.chatterz.darkenColor
-import dev.defvs.chatterz.lightenColor
-import io.multimoon.colorful.Colorful
 import kotlinx.android.parcel.Parcelize
 
 data class TwitchMessage(
@@ -46,43 +37,6 @@ data class TwitchMessage(
 		} else isAction = false
 	}
 	
-	suspend fun getMessageSpannable(context: Context): Spannable {
-		val spannable = SpannableStringBuilder()
-		
-		val color =
-			if (Colorful().getDarkTheme()) sender.color?.lightenColor() else sender.color?.darkenColor()
-		tags.find { it.name == "badges" }?.data?.let { Badges(it) }?.let { badges ->
-			if (color != null)
-				spannable.bold {
-					color(color) {
-						append(
-							badges.getBadgedSpannable(
-								context,
-								sender.displayName ?: sender.username
-							)
-						)
-					}
-				}
-			else spannable.bold {
-				append(
-					badges.getBadgedSpannable(
-						context,
-						sender.displayName ?: sender.username
-					)
-				)
-			}
-		} ?: spannable.append(sender.displayName ?: sender.username)
-		spannable.append(": ")
-		tags.find { it.name == "emotes" }?.data?.let { Emotes(it) }?.let { emotes ->
-			val emoteSpan = emotes.getEmotedSpannable(context, this@TwitchMessage)
-			if (isAction && color != null)
-				spannable.color(color) { append(emoteSpan) }
-			else spannable.append(emoteSpan)
-		} ?: spannable.append(message)
-		
-		return spannable.toSpannable()
-	}
-	
 	override fun writeToParcel(parcel: Parcel, flags: Int) {
 		parcel.writeParcelable(sender, Parcelable.PARCELABLE_WRITE_RETURN_VALUE)
 		parcel.writeString(message)
@@ -107,11 +61,12 @@ data class TwitchMessage(
 
 @Parcelize
 data class TwitchUser(
-	val username: String
-) : Parcelable {
-	var isMod: Boolean = false
-	var color: Int? = null
+	val username: String,
+	var isMod: Boolean = false,
+	var color: Int? = null,
 	var displayName: String? = null
+) : Parcelable {
+	
 	
 	constructor(username: String, tags: List<TwitchMessageTag>) : this(username) {
 		fromTags(tags)
