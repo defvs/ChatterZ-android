@@ -5,11 +5,11 @@
         android:id="@+id/settings"
         android:icon="@drawable/ic_settings_24"
         android:title="@string/menu_settings"
-        app:showAsAction="always" />
+        app:showAsAction="ifRoom" />
     
     <item
         android:id="@+id/connect_chat"
         android:icon="@drawable/ic_play_circle_filled_24"
-        android:title="@string/menu_connect_chat"
-        app:showAsAction="ifRoom" />
+        android:title="@string/action_connect"
+        app:showAsAction="always" />
 </menu>

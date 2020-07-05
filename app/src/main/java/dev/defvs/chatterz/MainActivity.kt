@@ -23,6 +23,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.IOException
 import dev.defvs.chatterz.MainActivity.Companion.sharedPreferences as preferences
 
 class MainActivity : ThemedActivity() {
@@ -124,8 +125,10 @@ class MainActivity : ThemedActivity() {
 		chatClient?.connect()
 	}
 	
+	private var menu: Menu? = null
 	override fun onCreateOptionsMenu(menu: Menu?): Boolean {
 		menuInflater.inflate(R.menu.main_menu, menu)
+		this.menu = menu
 		return true
 	}
 	
@@ -145,20 +148,43 @@ class MainActivity : ThemedActivity() {
 				GlobalScope.launch {
 					chatClient?.shutdown()
 					
-					chatClient = ChatClient(
-						username,
-						token,
-						resources.getString(R.string.twitch_client_id),
-						channel
-					).apply {
-						messageReceivedEvent = {
-							runOnUiThread {
-								onMessage(it)
+					try {
+						chatClient = ChatClient(
+							username,
+							token,
+							resources.getString(R.string.twitch_client_id),
+							channel
+						).apply {
+							messageReceivedEvent = {
+								runOnUiThread {
+									onMessage(it)
+								}
+							}
+							
+							disconnectedEvent = {
+								runOnUiThread {
+									supportActionBar?.title =
+										getString(R.string.disconnected_from, channel)
+									menu?.findItem(R.id.connect_chat)?.apply {
+										setIcon(R.drawable.ic_play_circle_filled_24)
+										title = getString(R.string.action_connect)
+									}
+								}
 							}
 						}
+						runOnUiThread {
+							supportActionBar?.title = getString(R.string.connected_to, channel)
+							menu?.findItem(R.id.connect_chat)?.apply {
+								setIcon(R.drawable.ic_refresh_24)
+								title = getString(R.string.action_reconnect)
+							}
+						}
+					} catch (e: IOException) {
+						Log.e("ChatClient", "Client init failed")
 					}
 				}
 			}
+			
 			
 			true
 		}
@@ -202,25 +228,25 @@ class ChatAdapter(private val messages: ArrayList<TwitchMessage>, private val co
 	override fun getItemCount() = messages.size
 	
 	override fun onBindViewHolder(holder: ViewHolder, i: Int) {
-			with(messages[i]) { holder.messageText.text = "$sender: $message" }
-			GlobalScope.launch {
-				try {
-					val spannable = chatClient?.getMessageSpannable(context, messages[i])
-					withContext(Dispatchers.Main) {
-						spannable?.let { holder.messageText.text = it }
-					}
-				} catch (e: Exception) {
-					Log.w("SpannableLoader", "Emotes and badges load failed", e)
+		with(messages[i]) { holder.messageText.text = "$sender: $message" }
+		GlobalScope.launch {
+			try {
+				val spannable = chatClient?.getMessageSpannable(context, messages[i])
+				withContext(Dispatchers.Main) {
+					spannable?.let { holder.messageText.text = it }
 				}
+			} catch (e: Exception) {
+				Log.w("SpannableLoader", "Emotes and badges load failed", e)
 			}
-			if (i % 2 == 0 && preferences.getBoolean("checkered_lines", false))
-				holder.itemView.setBackgroundColor(
-					Color.parseColor(
-						if (Colorful().getDarkTheme()) "#22FFFFFF"
-						else "#22000000"
-					)
+		}
+		if (i % 2 == 0 && preferences.getBoolean("checkered_lines", false))
+			holder.itemView.setBackgroundColor(
+				Color.parseColor(
+					if (Colorful().getDarkTheme()) "#22FFFFFF"
+					else "#22000000"
 				)
-			else holder.itemView.setBackgroundColor(Color.parseColor("#00000000"))
+			)
+		else holder.itemView.setBackgroundColor(Color.parseColor("#00000000"))
 	}
 	
 	class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
