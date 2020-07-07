@@ -4,7 +4,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.text.Editable
 import android.util.Log
 import android.view.*
 import android.view.inputmethod.EditorInfo
@@ -12,7 +14,12 @@ import android.widget.TextView
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.otaliastudios.autocomplete.Autocomplete
+import com.otaliastudios.autocomplete.AutocompleteCallback
+import com.otaliastudios.autocomplete.CharPolicy
 import dev.defvs.chatterz.MainActivity.Companion.chatClient
+import dev.defvs.chatterz.autocomplete.ChatAutoCompletePresenter
+import dev.defvs.chatterz.autocomplete.CompletableTwitchEmote
 import dev.defvs.chatterz.settings.SettingsActivity
 import dev.defvs.chatterz.themes.ThemedActivity
 import dev.defvs.chatterz.twitch.ChatClient
@@ -25,6 +32,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import dev.defvs.chatterz.MainActivity.Companion.sharedPreferences as preferences
+
 
 class MainActivity : ThemedActivity() {
 	private lateinit var chatRecyclerView: RecyclerView
@@ -48,6 +56,10 @@ class MainActivity : ThemedActivity() {
 	}
 	
 	private val messages: ArrayList<TwitchMessage> = arrayListOf()
+	
+	private lateinit var autoComplete: Autocomplete<CompletableTwitchEmote>
+	private val autoCompletePresenter = ChatAutoCompletePresenter(this, listOf())
+	private var channelEmotes: List<CompletableTwitchEmote>? = null
 	
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
@@ -76,17 +88,46 @@ class MainActivity : ThemedActivity() {
 			}
 		}
 		messageBox.setOnKeyListener { textView, id, event ->
-			return@setOnKeyListener when {
-				id in listOf(KeyEvent.KEYCODE_ENTER, KeyEvent.KEYCODE_NUMPAD_ENTER)
-						&& event.hasNoModifiers() && event.action == KeyEvent.ACTION_DOWN -> {
-					sendMessage((textView as TextView).text.toString())
+			return@setOnKeyListener if (event.action == KeyEvent.ACTION_DOWN) when (id) {
+				in listOf(KeyEvent.KEYCODE_ENTER, KeyEvent.KEYCODE_NUMPAD_ENTER) -> {
+					if (autoComplete.isPopupShowing) autoCompletePresenter.select()
+					else sendMessage((textView as TextView).text.toString())
+					
 					true
 				}
+				KeyEvent.KEYCODE_DPAD_UP -> {
+					autoCompletePresenter.selectionUp(); true
+				}
+				KeyEvent.KEYCODE_DPAD_DOWN -> {
+					autoCompletePresenter.selectionDown(); true
+				}
 				else -> false
-			}
+			} else false
 		}
 		
 		sharedPreferences.registerOnSharedPreferenceChangeListener(sharedPreferencesListener)
+		
+		// Autocomplete
+		
+		autoComplete = Autocomplete.on<CompletableTwitchEmote>(messageBox)
+			.with(CharPolicy(':', true))
+			.with(autoCompletePresenter)
+			.with(ColorDrawable(Color.parseColor("#77000000")))
+			.with(object : AutocompleteCallback<CompletableTwitchEmote> {
+				override fun onPopupItemClicked(
+					editable: Editable?,
+					item: CompletableTwitchEmote?
+				): Boolean {
+					if (editable == null || item == null) return false
+					val range =
+						CharPolicy.getQueryRange(editable)?.let { it[0]..it[1] } ?: return false
+					editable.replace(range.first - 1, range.last, item.name)
+					return true
+				}
+				
+				override fun onPopupVisibilityChanged(shown: Boolean) {}
+			})
+			.build()
 	}
 	
 	override fun onSaveInstanceState(outState: Bundle) {
@@ -143,6 +184,11 @@ class MainActivity : ThemedActivity() {
 			val username = sharedPreferences.getString("twitch_username", null)
 			val channel = sharedPreferences.getString("twitch_default_channel", username)
 				.let { if (it.isNullOrBlank()) username else it }
+			val twitchAPIKey = resources.getString(R.string.twitch_client_id)
+			
+			supportActionBar?.title = getString(R.string.connecting_to_with_emoji, channel)
+			disconnectedHint.text = getString(R.string.connecting_to, channel)
+			disconnectedHint.visibility = View.VISIBLE
 			
 			if (!(token.isNullOrBlank() || username.isNullOrBlank() || channel.isNullOrBlank())) {
 				GlobalScope.launch {
@@ -152,7 +198,7 @@ class MainActivity : ThemedActivity() {
 						chatClient = ChatClient(
 							username,
 							token,
-							resources.getString(R.string.twitch_client_id),
+							twitchAPIKey,
 							channel
 						).apply {
 							messageReceivedEvent = {
@@ -169,15 +215,35 @@ class MainActivity : ThemedActivity() {
 										setIcon(R.drawable.ic_play_circle_filled_24)
 										title = getString(R.string.action_connect)
 									}
+									messageBox.isEnabled = false
+									disconnectedHint.text = getString(R.string.disconnected)
+									disconnectedHint.visibility = View.VISIBLE
 								}
 							}
 						}
 						runOnUiThread {
-							supportActionBar?.title = getString(R.string.connected_to, channel)
 							menu?.findItem(R.id.connect_chat)?.apply {
 								setIcon(R.drawable.ic_refresh_24)
 								title = getString(R.string.action_reconnect)
 							}
+							messageBox.isEnabled = true
+							disconnectedHint.text = getString(R.string.loading_emotes)
+							
+							supportActionBar?.title = getString(R.string.loading_emotes_with_emoji)
+						}
+						channelEmotes = ChatClient.getUserId(twitchAPIKey, channel)
+							?.let {
+								CompletableTwitchEmote.getAllEmotes(
+									it,
+									twitchAPIKey,
+									token,
+									username
+								)
+							}
+						autoCompletePresenter.emotes = channelEmotes ?: listOf()
+						runOnUiThread {
+							supportActionBar?.title = getString(R.string.connected_to, channel)
+							disconnectedHint.visibility = View.GONE
 						}
 					} catch (e: IOException) {
 						Log.e("ChatClient", "Client init failed")

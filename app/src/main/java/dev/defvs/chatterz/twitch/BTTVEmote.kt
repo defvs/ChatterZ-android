@@ -15,7 +15,7 @@ data class ChannelBTTVEmotes(
 	val sharedEmotes: List<BTTVEmote>,
 	@Json(ignored = true) var globalEmotes: List<BTTVEmote> = listOf()
 ) {
-	private fun getAllEmotes() = channelEmotes + sharedEmotes + globalEmotes
+	fun getAllEmotes() = channelEmotes + sharedEmotes + globalEmotes
 	
 	suspend fun getEmotedSpannable(context: Context, spannable: Spannable): Spannable {
 		getAllEmotes().forEach {

@@ -14,4 +14,11 @@
 	<string name="preferences_dark_theme">Dark Theme</string>
 	<string name="action_disconnect">Disconnect</string>
 	<string name="action_reconnect">Reconnect</string>
+	<string name="no_emotes_found">No emotes found</string>
+	<string name="emote_image_descriptor">Emote Image</string>
+	<string name="connecting_to_with_emoji">🕸 Connecting to %1$s</string>
+	<string name="loading_emotes_with_emoji">🕸 Loading emotes</string>
+	<string name="connecting_to">Connecting to %1$s…</string>
+	<string name="loading_emotes">Loading emotes…</string>
+	<string name="disconnected">Disconnected</string>
 </resources>
