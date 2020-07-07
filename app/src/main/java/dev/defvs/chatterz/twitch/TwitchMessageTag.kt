@@ -13,6 +13,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.text.set
 import androidx.core.text.toSpannable
 import dev.defvs.chatterz.R
+import dev.defvs.chatterz.autocomplete.CompletableTwitchEmote
+import dev.defvs.chatterz.autocomplete.EmoteType
 import kotlinx.android.parcel.Parcelize
 import java.net.URL
 
@@ -98,7 +100,7 @@ data class Emotes(
 	
 	suspend fun getEmotedSpannable(context: Context, spannable: Spannable): Spannable {
 		emotes.forEach {
-			val emote = it.loadDrawable(context)
+			val emote = it.getDrawable(context)
 			val image = ImageSpan(emote, ImageSpan.ALIGN_BASELINE)
 			spannable.setSpan(
 				image,
@@ -116,23 +118,8 @@ data class Emote(
 	val positionStart: Int,
 	val positionEnd: Int
 ) {
-	suspend fun loadDrawable(
-		context: Context,
-		size: Int = 2
-	): BitmapDrawable {
-		// TODO: cache
-		val url = URL("https://static-cdn.jtvnw.net/emoticons/v1/$id/${size.coerceIn(1..3)}.0")
-		val bitmap = BitmapFactory.decodeStream(url.openConnection().apply { useCaches = true }
-			.getInputStream())
-		return BitmapDrawable(context.resources, bitmap).apply {
-			setBounds(
-				0,
-				0,
-				bitmap.width,
-				bitmap.height
-			)
-		}
-	}
+	suspend fun getDrawable(context: Context, size: Int = 2) =
+		CompletableTwitchEmote("", id, EmoteType.TWITCH).getDrawable(context, size)
 }
 
 @Parcelize

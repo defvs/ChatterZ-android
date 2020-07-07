@@ -1,6 +1,7 @@
 package dev.defvs.chatterz.autocomplete
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import com.beust.klaxon.Json
@@ -16,16 +17,18 @@ data class CompletableTwitchEmote(
 	val type: EmoteType
 ) {
 	suspend fun getDrawable(context: Context, size: Int): BitmapDrawable {
-		val url: URL = when (type) {
-			EmoteType.BTTV -> {
-				URL("https://cdn.betterttv.net/emote/$id/${size.coerceIn(1..3)}x")
+		val bitmap: Bitmap = TwitchEmoteCache.cache[this] ?: let {
+			val url: URL = when (type) {
+				EmoteType.BTTV -> {
+					URL("https://cdn.betterttv.net/emote/$id/${size.coerceIn(1..3)}x")
+				}
+				EmoteType.TWITCH -> {
+					URL("https://static-cdn.jtvnw.net/emoticons/v1/$id/${size.coerceIn(1..3)}.0")
+				}
 			}
-			EmoteType.TWITCH -> {
-				URL("https://static-cdn.jtvnw.net/emoticons/v1/$id/${size.coerceIn(1..3)}.0")
-			}
+			BitmapFactory.decodeStream(url.openConnection().apply { useCaches = true }
+				.getInputStream()).also { TwitchEmoteCache.cache[this] = it }
 		}
-		val bitmap = BitmapFactory.decodeStream(url.openConnection().apply { useCaches = true }
-			.getInputStream())
 		
 		return BitmapDrawable(context.resources, bitmap).apply {
 			setBounds(

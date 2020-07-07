@@ -294,7 +294,7 @@ class ChatAdapter(private val messages: ArrayList<TwitchMessage>, private val co
 	override fun getItemCount() = messages.size
 	
 	override fun onBindViewHolder(holder: ViewHolder, i: Int) {
-		with(messages[i]) { holder.messageText.text = "$sender: $message" }
+		with(messages[i]) { holder.messageText.text = "${sender.displayName}: $message" }
 		GlobalScope.launch {
 			try {
 				val spannable = chatClient?.getMessageSpannable(context, messages[i])
