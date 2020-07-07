@@ -8,6 +8,7 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.text.Editable
 import android.util.Log
+import android.util.TypedValue
 import android.view.*
 import android.view.inputmethod.EditorInfo
 import android.widget.TextView
@@ -31,6 +32,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
+import kotlin.math.roundToInt
 import dev.defvs.chatterz.MainActivity.Companion.sharedPreferences as preferences
 
 
@@ -42,7 +44,7 @@ class MainActivity : ThemedActivity() {
 	private val sharedPreferencesListener =
 		SharedPreferences.OnSharedPreferenceChangeListener { _, s ->
 			when (s) {
-				"checkered_lines" -> redrawChat()
+				"checkered_lines", "textsize_multiplier" -> redrawChat()
 				"dark_theme" -> Colorful().edit()
 					.setDarkTheme(sharedPreferences.getBoolean("dark_theme", true))
 					.apply(this) {
@@ -69,7 +71,8 @@ class MainActivity : ThemedActivity() {
 		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
 		
 		chatViewManager = LinearLayoutManager(this)
-		chatViewAdapter = ChatAdapter(messages, this)
+		chatViewAdapter =
+			ChatAdapter(messages, this) { chatViewManager.scrollTo(this, messages.size - 1) }
 		chatRecyclerView = chatRecycler.apply {
 			setHasFixedSize(true)
 			descendantFocusability
@@ -282,7 +285,11 @@ class MainActivity : ThemedActivity() {
 	}
 }
 
-class ChatAdapter(private val messages: ArrayList<TwitchMessage>, private val context: Context) :
+class ChatAdapter(
+	private val messages: ArrayList<TwitchMessage>,
+	private val context: Context,
+	private val runScrolling: () -> Unit
+) :
 	RecyclerView.Adapter<ChatAdapter.ViewHolder>() {
 	
 	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
@@ -294,12 +301,21 @@ class ChatAdapter(private val messages: ArrayList<TwitchMessage>, private val co
 	override fun getItemCount() = messages.size
 	
 	override fun onBindViewHolder(holder: ViewHolder, i: Int) {
+		holder.messageText.setTextSize(
+			TypedValue.COMPLEX_UNIT_SP,
+			(14.0f) * (preferences.getInt("textsize_multiplier", 100) / 100f)
+		)
 		with(messages[i]) { holder.messageText.text = "${sender.displayName}: $message" }
 		GlobalScope.launch {
 			try {
-				val spannable = chatClient?.getMessageSpannable(context, messages[i])
+				val spannable = chatClient?.getMessageSpannable(
+					context,
+					messages[i],
+					size = (56 * (preferences.getInt("textsize_multiplier", 100) / 100f)).roundToInt()
+				)
 				withContext(Dispatchers.Main) {
 					spannable?.let { holder.messageText.text = it }
+					runScrolling()
 				}
 			} catch (e: Exception) {
 				Log.w("SpannableLoader", "Emotes and badges load failed", e)

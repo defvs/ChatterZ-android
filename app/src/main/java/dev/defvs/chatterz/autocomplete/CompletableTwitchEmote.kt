@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
+import androidx.core.graphics.scale
 import com.beust.klaxon.Json
 import com.beust.klaxon.Klaxon
 import dev.defvs.chatterz.twitch.ChannelBTTVEmotes
@@ -16,26 +17,28 @@ data class CompletableTwitchEmote(
 	val id: String,
 	val type: EmoteType
 ) {
-	suspend fun getDrawable(context: Context, size: Int): BitmapDrawable {
+	suspend fun getDrawable(context: Context, apiSize: Int = 2, width: Int?): BitmapDrawable {
 		val bitmap: Bitmap = TwitchEmoteCache.cache[this] ?: let {
 			val url: URL = when (type) {
 				EmoteType.BTTV -> {
-					URL("https://cdn.betterttv.net/emote/$id/${size.coerceIn(1..3)}x")
+					URL("https://cdn.betterttv.net/emote/$id/${apiSize.coerceIn(1..3)}x")
 				}
 				EmoteType.TWITCH -> {
-					URL("https://static-cdn.jtvnw.net/emoticons/v1/$id/${size.coerceIn(1..3)}.0")
+					URL("https://static-cdn.jtvnw.net/emoticons/v1/$id/${apiSize.coerceIn(1..3)}.0")
 				}
 			}
 			BitmapFactory.decodeStream(url.openConnection().apply { useCaches = true }
 				.getInputStream()).also { TwitchEmoteCache.cache[this] = it }
 		}
 		
-		return BitmapDrawable(context.resources, bitmap).apply {
+		return BitmapDrawable(
+			context.resources,
+			width?.let { bitmap.scale(it, it) } ?: bitmap).apply {
 			setBounds(
 				0,
 				0,
-				bitmap.width,
-				bitmap.height
+				width ?: bitmap.width,
+				width ?: bitmap.height
 			)
 		}
 	}
@@ -86,7 +89,8 @@ data class CompletableTwitchEmote(
 			}
 			if (connection.responseCode != 200) return listOf()
 			return Klaxon().parse<TwitchEmotesResponse>(connection.inputStream)?.emoteSets?.map { it.value }
-				?.flatten()?.map { CompletableTwitchEmote(it.code, it.id.toString(), EmoteType.TWITCH) }
+				?.flatten()
+				?.map { CompletableTwitchEmote(it.code, it.id.toString(), EmoteType.TWITCH) }
 				?: listOf()
 		}
 	}

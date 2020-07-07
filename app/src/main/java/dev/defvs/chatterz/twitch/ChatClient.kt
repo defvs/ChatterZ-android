@@ -36,7 +36,8 @@ class ChatClient(
 	suspend fun getMessageSpannable(
 		context: Context,
 		message: TwitchMessage,
-		bttvEmotes: ChannelBTTVEmotes? = BTTVemotes
+		bttvEmotes: ChannelBTTVEmotes? = BTTVemotes,
+		size: Int? = null
 	): Spannable {
 		with(message) {
 			val spannable = SpannableStringBuilder()
@@ -50,7 +51,8 @@ class ChatClient(
 							append(
 								badges.getBadgedSpannable(
 									context,
-									sender.displayName ?: sender.username
+									sender.displayName ?: sender.username,
+									size
 								)
 							)
 						}
@@ -59,7 +61,8 @@ class ChatClient(
 					append(
 						badges.getBadgedSpannable(
 							context,
-							sender.displayName ?: sender.username
+							sender.displayName ?: sender.username,
+							size
 						)
 					)
 				}
@@ -68,9 +71,9 @@ class ChatClient(
 			
 			var emoteSpan = SpannableString(this.message) as Spannable
 			emoteSpan = tags.find { it.name == "emotes" }?.data?.let { Emotes(it) }
-				?.getEmotedSpannable(context, emoteSpan) ?: emoteSpan
+				?.getEmotedSpannable(context, emoteSpan, size) ?: emoteSpan
 			
-			emoteSpan = bttvEmotes?.getEmotedSpannable(context, emoteSpan) ?: emoteSpan
+			emoteSpan = bttvEmotes?.getEmotedSpannable(context, emoteSpan, size) ?: emoteSpan
 			
 			if (isAction && color != null)
 				spannable.color(color) { append(emoteSpan) }
@@ -152,7 +155,11 @@ class ChatClient(
 			if (data.responseCode != 200) return null
 			return (Parser.default().parse(data.inputStream) as? JsonObject)
 				?.array<JsonObject>("users")?.get(0)?.string("_id")
-				.also { if (it != null) { userIdCache[username] = it } }
+				.also {
+					if (it != null) {
+						userIdCache[username] = it
+					}
+				}
 		}
 	}
 }

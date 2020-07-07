@@ -31,3 +31,10 @@ fun Int.darkenColor(): Int {
 	hsv[1] = 1 - (1 - hsv[1]) / 2
 	return Color.HSVToColor(hsv)
 }
+
+fun Context.dimensionFromAttribute(attribute: Int): Int {
+	val attributes = obtainStyledAttributes(intArrayOf(attribute))
+	val dimension = attributes.getDimensionPixelSize(0, 0)
+	attributes.recycle()
+	return dimension
+}
