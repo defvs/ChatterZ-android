@@ -12,11 +12,10 @@
 		android:roundIcon="@mipmap/ic_launcher_round"
 		android:supportsRtl="true"
 		android:theme="@style/AppTheme">
-		
+		<activity android:name=".TwitchLoginActivity"></activity>
 		<activity
 			android:name=".settings.SettingsActivity"
 			android:label="@string/title_activity_settings" />
-		
 		<activity android:name=".MainActivity">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
@@ -33,6 +32,17 @@
 					android:host="chatterz.app"
 					android:path="/twitch-oauth"
 					android:scheme="http" />
+			</intent-filter>
+			<intent-filter>
+				<action android:name="android.intent.action.VIEW" />
+				
+				<category android:name="android.intent.category.DEFAULT" />
+				<category android:name="android.intent.category.BROWSABLE" />
+				
+				<data
+					android:host="chatterz.app"
+					android:path="/twitch-oauth"
+					android:scheme="https" />
 			</intent-filter>
 		</activity>
 	</application>
