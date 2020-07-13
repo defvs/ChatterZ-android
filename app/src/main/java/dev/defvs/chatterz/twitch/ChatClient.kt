@@ -12,6 +12,7 @@ import com.beust.klaxon.JsonObject
 import com.beust.klaxon.Parser
 import dev.defvs.chatterz.darkenColor
 import dev.defvs.chatterz.lightenColor
+import dev.defvs.chatterz.twitch.TwitchAPI.getUserId
 import io.multimoon.colorful.Colorful
 import org.jibble.pircbot.PircBot
 import java.net.HttpURLConnection
@@ -139,27 +140,5 @@ class ChatClient(
 	fun shutdown() {
 		partChannel(ircChannel)
 		disconnect()
-	}
-	
-	companion object {
-		private val userIdCache: MutableMap<String, String> = mutableMapOf()
-		fun getUserId(apiKey: String, username: String): String? {
-			userIdCache[username]?.let { return it } // return cached ID
-			val url = URL("https://api.twitch.tv/kraken/users?login=$username")
-			
-			val data: HttpURLConnection = (url.openConnection() as HttpURLConnection).apply {
-				setRequestProperty("Accept", "application/vnd.twitchtv.v5+json")
-				setRequestProperty("Client-ID", apiKey)
-			}
-			
-			if (data.responseCode != 200) return null
-			return (Parser.default().parse(data.inputStream) as? JsonObject)
-				?.array<JsonObject>("users")?.get(0)?.string("_id")
-				.also {
-					if (it != null) {
-						userIdCache[username] = it
-					}
-				}
-		}
 	}
 }

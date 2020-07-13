@@ -9,6 +9,7 @@ import com.beust.klaxon.Json
 import com.beust.klaxon.Klaxon
 import dev.defvs.chatterz.twitch.ChannelBTTVEmotes
 import dev.defvs.chatterz.twitch.ChatClient
+import dev.defvs.chatterz.twitch.TwitchAPI.getUserId
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -79,7 +80,7 @@ data class CompletableTwitchEmote(
 			oauthId: String,
 			username: String
 		): List<CompletableTwitchEmote> {
-			val userId = ChatClient.getUserId(apiKey, username)
+			val userId = getUserId(apiKey, username)
 			val connection = URL("https://api.twitch.tv/kraken/users/$userId/emotes")
 				.openConnection() as HttpURLConnection
 			connection.apply {

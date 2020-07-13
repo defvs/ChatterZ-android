@@ -24,4 +24,6 @@
 	<string name="preferences_textsize_multiplier">Text size multiplier</string>
 	<string name="action_send">Send</string>
 	<string name="message_box_hint">Message Field</string>
+	<string name="action_login">Login</string>
+	<string name="action_login_twitch">Login to Twitch</string>
 </resources>

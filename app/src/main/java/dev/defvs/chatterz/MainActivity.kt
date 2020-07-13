@@ -24,6 +24,7 @@ import dev.defvs.chatterz.autocomplete.CompletableTwitchEmote
 import dev.defvs.chatterz.settings.SettingsActivity
 import dev.defvs.chatterz.themes.ThemedActivity
 import dev.defvs.chatterz.twitch.ChatClient
+import dev.defvs.chatterz.twitch.TwitchAPI.getUserId
 import dev.defvs.chatterz.twitch.TwitchMessage
 import io.multimoon.colorful.Colorful
 import kotlinx.android.synthetic.main.activity_main.*
@@ -234,7 +235,7 @@ class MainActivity : ThemedActivity() {
 							
 							supportActionBar?.title = getString(R.string.loading_emotes_with_emoji)
 						}
-						channelEmotes = ChatClient.getUserId(twitchAPIKey, channel)
+						channelEmotes = getUserId(twitchAPIKey, channel)
 							?.let {
 								CompletableTwitchEmote.getAllEmotes(
 									it,
@@ -255,6 +256,11 @@ class MainActivity : ThemedActivity() {
 			}
 			
 			
+			true
+		}
+		R.id.connect_twitch -> {
+			startActivity(Intent(this, TwitchLoginActivity::class.java))
+			overridePendingTransition(R.anim.slide_in_right, android.R.anim.fade_out)
 			true
 		}
 		else -> super.onOptionsItemSelected(item)

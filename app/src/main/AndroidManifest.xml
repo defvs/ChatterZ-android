@@ -12,24 +12,17 @@
 		android:roundIcon="@mipmap/ic_launcher_round"
 		android:supportsRtl="true"
 		android:theme="@style/AppTheme">
-		<activity android:name=".TwitchLoginActivity"></activity>
 		<activity
-			android:name=".settings.SettingsActivity"
-			android:label="@string/title_activity_settings" />
-		<activity android:name=".MainActivity">
-			<intent-filter>
-				<action android:name="android.intent.action.MAIN" />
-				
-				<category android:name="android.intent.category.LAUNCHER" />
-			</intent-filter>
-			<intent-filter>
+			android:name=".TwitchLoginActivity"
+			android:label="@string/action_login_twitch">
+			<intent-filter android:autoVerify="true">
 				<action android:name="android.intent.action.VIEW" />
 				
 				<category android:name="android.intent.category.DEFAULT" />
 				<category android:name="android.intent.category.BROWSABLE" />
 				
 				<data
-					android:host="chatterz.app"
+					android:host="chatterz.live"
 					android:path="/twitch-oauth"
 					android:scheme="http" />
 			</intent-filter>
@@ -40,9 +33,19 @@
 				<category android:name="android.intent.category.BROWSABLE" />
 				
 				<data
-					android:host="chatterz.app"
+					android:host="chatterz.live"
 					android:path="/twitch-oauth"
 					android:scheme="https" />
+			</intent-filter>
+		</activity>
+		<activity
+			android:name=".settings.SettingsActivity"
+			android:label="@string/title_activity_settings" />
+		<activity android:name=".MainActivity">
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+				
+				<category android:name="android.intent.category.LAUNCHER" />
 			</intent-filter>
 		</activity>
 	</application>
