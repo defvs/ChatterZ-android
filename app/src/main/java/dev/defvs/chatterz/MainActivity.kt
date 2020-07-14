@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.util.Log
@@ -24,6 +25,7 @@ import dev.defvs.chatterz.autocomplete.CompletableTwitchEmote
 import dev.defvs.chatterz.settings.SettingsActivity
 import dev.defvs.chatterz.themes.ThemedActivity
 import dev.defvs.chatterz.twitch.ChatClient
+import dev.defvs.chatterz.twitch.TwitchAPI
 import dev.defvs.chatterz.twitch.TwitchAPI.getUserId
 import dev.defvs.chatterz.twitch.TwitchMessage
 import io.multimoon.colorful.Colorful
@@ -132,6 +134,8 @@ class MainActivity : ThemedActivity() {
 				override fun onPopupVisibilityChanged(shown: Boolean) {}
 			})
 			.build()
+		
+		handleIntent(intent)
 	}
 	
 	override fun onSaveInstanceState(outState: Bundle) {
@@ -259,8 +263,7 @@ class MainActivity : ThemedActivity() {
 			true
 		}
 		R.id.connect_twitch -> {
-			startActivity(Intent(this, TwitchLoginActivity::class.java))
-			overridePendingTransition(R.anim.slide_in_right, android.R.anim.fade_out)
+			openTwitchLogin()
 			true
 		}
 		else -> super.onOptionsItemSelected(item)
@@ -282,6 +285,37 @@ class MainActivity : ThemedActivity() {
 		chatViewManager.scrollTo(this, messages.size - 1)
 		
 		messageBox.clear()
+	}
+	
+	override fun onNewIntent(intent: Intent) {
+		super.onNewIntent(intent)
+		handleIntent(intent)
+	}
+	
+	private fun handleIntent(intent: Intent) {
+		if (intent.action == Intent.ACTION_VIEW) {
+			val data = intent.data?.fragment?.split('&')?.map {
+				it.split('=').let { it[0] to it[1] }
+			}?.toMap() ?: mapOf()
+			
+			data["access_token"]?.let { token ->
+				preferences.edit().putString("twitch_token", token).apply()
+				GlobalScope.launch {
+					val username =
+						TwitchAPI.getUsername(getString(R.string.twitch_client_id), token)
+					preferences.edit().putString("twitch_username", username).apply()
+				}
+			}
+		}
+	}
+	
+	private fun openTwitchLogin() {
+		val url = "https://id.twitch.tv/oauth2/authorize" +
+				"?client_id=${getString(R.string.twitch_client_id)}" +
+				"&redirect_uri=https://chatterz.live/twitch-oauth" +
+				"&response_type=token" +
+				"&scope=user_read chat:edit chat:read"
+		startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
 	}
 	
 	companion object {
@@ -317,7 +351,10 @@ class ChatAdapter(
 				val spannable = chatClient?.getMessageSpannable(
 					context,
 					messages[i],
-					size = (56 * (preferences.getInt("textsize_multiplier", 100) / 100f)).roundToInt()
+					size = (56 * (preferences.getInt(
+						"textsize_multiplier",
+						100
+					) / 100f)).roundToInt()
 				)
 				withContext(Dispatchers.Main) {
 					spannable?.let { holder.messageText.text = it }

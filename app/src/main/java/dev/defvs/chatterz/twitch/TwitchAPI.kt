@@ -1,7 +1,11 @@
 package dev.defvs.chatterz.twitch
 
 import com.beust.klaxon.JsonObject
+import com.beust.klaxon.Klaxon
 import com.beust.klaxon.Parser
+import dev.defvs.chatterz.autocomplete.CompletableTwitchEmote
+import dev.defvs.chatterz.autocomplete.EmoteType
+import dev.defvs.chatterz.autocomplete.TwitchEmotesResponse
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -41,4 +45,19 @@ object TwitchAPI {
 			(Parser.default().parse(it.inputStream) as? JsonObject)
 				?.string("name")
 		}
+	
+	fun getTwitchEmotes(
+		apiKey: String,
+		oauthToken: String,
+		username: String
+	): List<CompletableTwitchEmote> {
+		val userId = getUserId(apiKey, username)
+		val connection = getFromAPI(URL("https://api.twitch.tv/kraken/users/$userId/emotes"), apiKey, oauthToken)
+		return if (connection != null) {
+			Klaxon().parse<TwitchEmotesResponse>(connection.inputStream)?.emoteSets?.map { it.value }
+				?.flatten()
+				?.map { CompletableTwitchEmote(it.code, it.id.toString(), EmoteType.TWITCH) }
+				?: listOf()
+		} else listOf()
+	}
 }
