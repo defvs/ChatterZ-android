@@ -13,9 +13,6 @@
 		android:supportsRtl="true"
 		android:theme="@style/AppTheme">
 		<activity
-			android:name=".TwitchLoginActivity"
-			android:label="@string/action_login_twitch"></activity>
-		<activity
 			android:name=".settings.SettingsActivity"
 			android:label="@string/title_activity_settings" />
 		<activity android:name=".MainActivity">
