@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="menu_settings">Réglages</string>
+	<string name="title_activity_settings">Réglages</string>
+	<string name="disconnected_from">🚫 Déconnecté de %1$s</string>
+	<string name="connected_to">📡 Connecté à %1$s</string>
+	<string name="theme_header">Thème de l\'App</string>
+	<string name="preferences_checkered_lines">Lignes aux couleurs alternées</string>
+	<string name="action_connect">Se connecter</string>
+	<string name="settings_twitch_token">Jeton Twitch OAuth</string>
+	<string name="debug_header">Débogage</string>
+	<string name="unknown_sender">Inconnu</string>
+	<string name="preferences_dark_theme">Thème sombre</string>
+	<string name="action_disconnect">Se déconnecter</string>
+	<string name="action_reconnect">Se reconnecter</string>
+	<string name="no_emotes_found">Aucune émote trouvée</string>
+	<string name="emote_image_descriptor">Image de l\'émote</string>
+	<string name="connecting_to_with_emoji">🕸 Connexion à %1$s</string>
+	<string name="loading_emotes_with_emoji">🕸 Chargement des émotes</string>
+	<string name="connecting_to">Connexion à %1$s…</string>
+	<string name="loading_emotes">Chargement des émotes…</string>
+	<string name="disconnected">Déconnecté</string>
+	<string name="preferences_textsize_multiplier">Multiplicateur taille du texte</string>
+	<string name="action_send">Envoyer</string>
+	<string name="message_box_hint">Entrez vos messages ici…</string>
+	<string name="action_login">Se connecter</string>
+	<string name="action_login_twitch">Se connecter à Twitch</string>
+	<string name="settings_last_channel">Dernière chaine</string>
+	<string name="settings_twitch_username">Nom d\'utilisateur Twitch</string>
+	<string name="connect_to">Se connecter à…</string>
+	<string name="action_connect_self">Se connecter à sa chaine</string>
+	<string name="action_connect_last">Se connecter à la chaine précédente</string>
+	<string name="not_logged_in">Vous n\'êtes pas connecté à Twitch</string>
+	<string name="empty_username">Nom d\'utilisateur vide. Veuillez vous reconnecter à Twitch</string>
+	<string name="error_login">Un problème est survennu durant la connexion. Veuillez réessayer.</string>
+	<string name="error_network">Problème de réseau. Vérifiez la connexion et réessayez.</string>
+	<string name="connection_failed">Echec de la connection</string>
+</resources>

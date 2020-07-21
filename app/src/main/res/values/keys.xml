@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<string name="twitch_client_id">f920jlcx6pkd1sf911j7vdwgyl21fp</string>
+	<string name="twitch_client_id" translatable="false">f920jlcx6pkd1sf911j7vdwgyl21fp</string>
 </resources>
