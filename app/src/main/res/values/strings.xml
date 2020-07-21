@@ -31,4 +31,9 @@
 	<string name="connect_to">Connect to…</string>
 	<string name="action_connect_self">Connect to your channel</string>
 	<string name="action_connect_last">Connect to last channel</string>
+	<string name="not_logged_in">You are not logged in to Twitch</string>
+	<string name="empty_username">Empty username. Please log back to Twitch</string>
+	<string name="error_login">There was an issue logging in. Please retry.</string>
+	<string name="error_network">Network error. Please check your connection and try again.</string>
+	<string name="connection_failed">Connection failed</string>
 </resources>

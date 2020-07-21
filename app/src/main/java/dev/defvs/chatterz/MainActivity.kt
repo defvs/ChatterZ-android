@@ -26,6 +26,7 @@ import co.zsmb.materialdrawerkt.builders.footer
 import co.zsmb.materialdrawerkt.draweritems.badgeable.primaryItem
 import co.zsmb.materialdrawerkt.draweritems.divider
 import co.zsmb.materialdrawerkt.imageloader.drawerImageLoader
+import com.google.android.material.snackbar.Snackbar
 import com.mikepenz.materialdrawer.util.DrawerUIUtils
 import com.otaliastudios.autocomplete.Autocomplete
 import com.otaliastudios.autocomplete.AutocompleteCallback
@@ -162,32 +163,19 @@ class MainActivity : ThemedActivity() {
 		handleIntent(intent)
 		
 		// Drawer
-		drawerImageLoader {
-			placeholder { ctx, _ ->
-				DrawerUIUtils.getPlaceHolder(ctx)
-			}
-			set { imageView, uri, placeholder, _ ->
-				imageView.setImageDrawable(placeholder)
-				GlobalScope.launch {
-					val connection = URL(uri.toString()).openConnection() as HttpURLConnection
-					if (connection.responseCode == 200) {
-						val drawable = BitmapDrawable(resources, connection.inputStream)
-						runOnUiThread { imageView.setImageDrawable(drawable) }
-					} else {
-						Log.w(
-							"DrawerImageLoader",
-							"Failed to load image from $uri: ${connection.responseCode} ${connection.responseMessage}"
-						)
-					}
-				}
-			}
-			cancel {}
-		}
 		setupDrawer(
 			!sharedPreferences.getString("twitch_token", null).isNullOrBlank(),
 			!sharedPreferences.getString("twitch_last_channel", null).isNullOrBlank()
-		)
+		).openDrawer()
 	}
+	
+	private fun showSnackbar(messageRes: Int, actionRes: Int? = null, action: ((View) -> Unit)? = null) =
+		Snackbar.make(contentLayout, messageRes, Snackbar.LENGTH_LONG).apply {
+			if (actionRes != null && action != null)
+				setAction(actionRes, action)
+		}.show()
+	
+	private fun showLoggedOffSnackbar() = showSnackbar(R.string.not_logged_in, R.string.action_login) { openTwitchLogin() }
 	
 	@Suppress("RedundantCompanionReference")
 	private fun setupDrawer(enableConnect: Boolean = false, enableConnectLast: Boolean = false) =
@@ -310,7 +298,10 @@ class MainActivity : ThemedActivity() {
 	
 	private fun connectToLastChannel() = sharedPreferences.getString("twitch_last_channel", null)?.let { connectToChannel(it) }
 	
-	private fun connectToLastOrOwn() = connectToLastChannel() ?: connectToOwnChannel()
+	private fun connectToLastOrOwn() = connectToLastChannel() ?: connectToOwnChannel() ?: showSnackbar(
+		R.string.empty_username,
+		R.string.action_login
+	) { openTwitchLogin() }
 	
 	private fun connectToChannel(channel: String) {
 		val token = sharedPreferences.getString("twitch_token", null)
@@ -348,10 +339,11 @@ class MainActivity : ThemedActivity() {
 									getString(R.string.disconnected_from, channel)
 								menu?.findItem(R.id.connect_chat)?.apply {
 									setIcon(R.drawable.ic_play_circle_filled_24)
-									title = getString(R.string.action_connect)
+									title = getString(R.string.action_connect_last)
 								}
 								messageBox.isEnabled = false
 								disconnectedHint.text = getString(R.string.disconnected)
+								showSnackbar(R.string.disconnected)
 								disconnectedHint.visibility = View.VISIBLE
 							}
 						}
@@ -382,15 +374,28 @@ class MainActivity : ThemedActivity() {
 					}
 				} catch (e: IOException) {
 					Log.e("ChatClient", "Client init failed")
+					showSnackbar(R.string.error_network)
+					runOnUiThread {
+						supportActionBar?.title =
+							getString(R.string.connection_failed)
+						menu?.findItem(R.id.connect_chat)?.apply {
+							setIcon(R.drawable.ic_play_circle_filled_24)
+							title = getString(R.string.action_connect_last)
+						}
+						messageBox.isEnabled = false
+						disconnectedHint.text = getString(R.string.connection_failed)
+						disconnectedHint.visibility = View.VISIBLE
+					}
 				}
 			}
-		}
+		} else showLoggedOffSnackbar()
 	}
 	
 	private fun openSettings() {
 		startActivity(Intent(this, SettingsActivity::class.java))
 		overridePendingTransition(R.anim.slide_in_right, android.R.anim.fade_out)
 	}
+	
 	override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
 		R.id.settings -> {
 			openSettings()
@@ -439,7 +444,7 @@ class MainActivity : ThemedActivity() {
 						TwitchAPI.getUsername(clientId, token)
 					preferences.edit().putString("twitch_username", username).apply()
 				}
-			}
+			} ?: showSnackbar(R.string.error_login)
 		}
 	}
 	
