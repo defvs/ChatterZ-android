@@ -13,12 +13,12 @@
 		app:key="twitch_username"
 		android:selectAllOnFocus="true"
 		android:singleLine="true"
-		app:title="Twitch Username" />
+		app:title="@string/settings_twitch_username" />
 	
 	<EditTextPreference
 		app:defaultValue=""
-		app:key="twitch_default_channel"
+		app:key="twitch_last_channel"
 		android:selectAllOnFocus="true"
 		android:singleLine="true"
-		app:title="Default Channel" />
+		app:title="@string/settings_last_channel" />
 </PreferenceScreen>

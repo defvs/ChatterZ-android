@@ -26,4 +26,9 @@
 	<string name="message_box_hint">Message Field</string>
 	<string name="action_login">Login</string>
 	<string name="action_login_twitch">Login to Twitch</string>
+	<string name="settings_last_channel">Last Channel</string>
+	<string name="settings_twitch_username">Twitch Username</string>
+	<string name="connect_to">Connect to…</string>
+	<string name="action_connect_self">Connect to your channel</string>
+	<string name="action_connect_last">Connect to last channel</string>
 </resources>

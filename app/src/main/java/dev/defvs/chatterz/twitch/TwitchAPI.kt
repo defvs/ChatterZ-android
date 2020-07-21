@@ -31,7 +31,7 @@ object TwitchAPI {
 		
 		return getFromAPI(URL("https://api.twitch.tv/kraken/users?login=$username"), apiKey)?.let {
 			(Parser.default().parse(it.inputStream) as? JsonObject)
-				?.array<JsonObject>("users")?.get(0)?.string("_id")
+				?.array<JsonObject>("users")?.getOrNull(0)?.string("_id")
 				.also {
 					if (it != null) {
 						userIdCache[username] = it
@@ -40,11 +40,11 @@ object TwitchAPI {
 		}
 	}
 	
-	fun getUsername(apiKey: String, oauthToken: String) =
-		getFromAPI(URL("https://api.twitch.tv/kraken/user"), apiKey, oauthToken)?.let {
-			(Parser.default().parse(it.inputStream) as? JsonObject)
-				?.string("name")
-		}
+	fun getUserInfo(apiKey: String, oauthToken: String) = getFromAPI(URL("https://api.twitch.tv/kraken/user"), apiKey, oauthToken)
+		?.let { (Parser.default().parse(it.inputStream) as? JsonObject) }
+	
+	fun getUsername(apiKey: String, oauthToken: String) = getUserInfo(apiKey, oauthToken)?.string("name")
+	fun getUserIconURL(apiKey: String, oauthToken: String) = getUserInfo(apiKey, oauthToken)?.string("logo")
 	
 	fun getTwitchEmotes(
 		apiKey: String,
@@ -60,4 +60,5 @@ object TwitchAPI {
 				?: listOf()
 		} else listOf()
 	}
+	
 }
