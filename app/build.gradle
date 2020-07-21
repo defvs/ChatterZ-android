@@ -20,8 +20,8 @@ android {
         applicationId "dev.defvs.chatterz"
         minSdkVersion 16
         targetSdkVersion 30
-        versionCode 2
-        versionName "pre7"
+        versionCode 8
+        versionName "pre8"
 
         multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
