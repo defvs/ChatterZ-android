@@ -294,9 +294,9 @@ class MainActivity : ThemedActivity() {
 		return true
 	}
 	
-	private fun connectToOwnChannel() = sharedPreferences.getString("twitch_username", null)?.let { connectToChannel(it) }
+	private fun connectToOwnChannel() = sharedPreferences.getString("twitch_username", null).nullIfEmpty()?.let { connectToChannel(it) }
 	
-	private fun connectToLastChannel() = sharedPreferences.getString("twitch_last_channel", null)?.let { connectToChannel(it) }
+	private fun connectToLastChannel() = sharedPreferences.getString("twitch_last_channel", null).nullIfEmpty()?.let { connectToChannel(it) }
 	
 	private fun connectToLastOrOwn() = connectToLastChannel() ?: connectToOwnChannel() ?: showSnackbar(
 		R.string.empty_username,
@@ -316,6 +316,7 @@ class MainActivity : ThemedActivity() {
 		
 		if (!(token.isNullOrBlank() || username.isNullOrBlank() || channel.isBlank())) {
 			messages.clear()
+			chatViewAdapter.notifyDataSetChanged()
 			
 			GlobalScope.launch {
 				chatClient?.shutdown()

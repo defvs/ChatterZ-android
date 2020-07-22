@@ -38,3 +38,5 @@ fun Context.dimensionFromAttribute(attribute: Int): Int {
 	attributes.recycle()
 	return dimension
 }
+
+fun String?.nullIfEmpty(): String? = if (this.isNullOrBlank()) null else this
