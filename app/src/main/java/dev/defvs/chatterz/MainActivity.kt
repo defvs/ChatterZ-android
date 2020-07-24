@@ -53,6 +53,15 @@ class MainActivity : ThemedActivity() {
 	private lateinit var chatViewAdapter: RecyclerView.Adapter<*>
 	private lateinit var chatViewManager: RecyclerView.LayoutManager
 	
+	private var autoScroll: Boolean = false
+		set(value) {
+			field = value
+			if (value) {
+				scrollFab.hide()
+				scrollToBottom()
+			} else scrollFab.show()
+		}
+	
 	private val clientId: String
 		get() = getString(R.string.twitch_client_id)
 	
@@ -102,6 +111,8 @@ class MainActivity : ThemedActivity() {
 			adapter = chatViewAdapter
 		}
 		
+		scrollFab.setOnClickListener { autoScroll = true }
+		
 		sendButton.setOnClickListener { sendMessage(messageBox.text.toString()) }
 		messageBox.setOnEditorActionListener { textView, id, _ ->
 			return@setOnEditorActionListener when (id) {
@@ -129,6 +140,15 @@ class MainActivity : ThemedActivity() {
 				else -> false
 			} else false
 		}
+		
+		chatRecyclerView.addOnScrollListener(
+			object : RecyclerView.OnScrollListener() {
+				override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+					super.onScrollStateChanged(recyclerView, newState)
+					if (newState == RecyclerView.SCROLL_STATE_DRAGGING) autoScroll = false
+				}
+			}
+		)
 		
 		sharedPreferences.registerOnSharedPreferenceChangeListener(sharedPreferencesListener)
 		
@@ -390,7 +410,7 @@ class MainActivity : ThemedActivity() {
 	}
 	
 	private fun scrollToBottom() {
-		chatViewManager.scrollTo(this, messages.size - 1)
+		if (autoScroll) chatViewManager.scrollTo(this, messages.size - 1)
 	}
 	
 	private fun onMessage(message: TwitchMessage) {

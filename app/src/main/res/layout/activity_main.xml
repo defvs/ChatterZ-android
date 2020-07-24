@@ -66,5 +66,17 @@
 			app:layout_constraintEnd_toEndOf="parent"
 			app:layout_constraintStart_toStartOf="parent"
 			app:layout_constraintTop_toTopOf="@+id/chatRecycler" />
+		
+		<com.google.android.material.floatingactionbutton.FloatingActionButton
+			android:id="@+id/scrollFab"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginEnd="24dp"
+			android:layout_marginRight="24dp"
+			android:layout_marginBottom="24dp"
+			android:contentDescription="@string/description_enable_autoscroll"
+			android:src="@drawable/ic_scroll_bottom"
+			app:layout_constraintBottom_toBottomOf="@+id/chatRecycler"
+			app:layout_constraintEnd_toEndOf="@+id/chatRecycler" />
 	</androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.drawerlayout.widget.DrawerLayout>

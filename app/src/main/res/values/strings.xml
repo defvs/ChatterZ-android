@@ -36,4 +36,5 @@
 	<string name="error_login">There was an issue logging in. Please retry.</string>
 	<string name="error_network">Network error. Please check your connection and try again.</string>
 	<string name="connection_failed">Connection failed</string>
+	<string name="description_enable_autoscroll">Enable Autoscroll</string>
 </resources>
