@@ -1,11 +1,8 @@
 package dev.defvs.chatterz.twitch
 
 import android.content.Context
-import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
-import android.os.Parcelable
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.SpannableStringBuilder
@@ -14,20 +11,15 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.text.set
 import androidx.core.text.toSpannable
-import dev.defvs.chatterz.CenteredImageSpan
 import dev.defvs.chatterz.R
 import dev.defvs.chatterz.autocomplete.CompletableTwitchEmote
 import dev.defvs.chatterz.autocomplete.EmoteType
-import kotlinx.android.parcel.Parcelize
-import java.net.URL
-import kotlin.math.roundToInt
 
 
-@Parcelize
 open class TwitchMessageTag(
 	open val name: String,
 	open val data: String
-) : Parcelable {
+) {
 	companion object {
 		fun parseTags(tagMessage: String): List<TwitchMessageTag> =
 			tagMessage.substringBefore("tmi.twitch.tv").substringBeforeLast(":").substringAfter('@')
@@ -38,7 +30,6 @@ open class TwitchMessageTag(
 	override fun toString() = "$name=$data"
 }
 
-@Parcelize
 data class Badges(
 	override val data: String
 ) : TwitchMessageTag("badges", data) {
@@ -79,7 +70,6 @@ data class Badge(val name: String, val version: String? = null, val imageUrl: St
 	}
 }
 
-@Parcelize
 data class Emotes(
 	override val data: String
 ) : TwitchMessageTag("emotes", data) {
@@ -133,7 +123,6 @@ data class Emote(
 		CompletableTwitchEmote("", id, EmoteType.TWITCH).getDrawable(context, size, width)
 }
 
-@Parcelize
 data class Color(
 	override val data: String
 ) : TwitchMessageTag("color", data) {
@@ -141,7 +130,6 @@ data class Color(
 		get() = data.ifEmpty { null }?.let { Color.parseColor(it) }
 }
 
-@Parcelize
 data class Mod(
 	override val data: String
 ) : TwitchMessageTag("mod", data) {
@@ -149,7 +137,6 @@ data class Mod(
 		get() = data.toIntOrNull()?.equals(1) ?: false
 }
 
-@Parcelize
 data class DisplayName(
 	override val data: String
 ) : TwitchMessageTag("display_name", data) {

@@ -8,15 +8,12 @@ import android.util.Log
 import androidx.core.text.bold
 import androidx.core.text.color
 import androidx.core.text.toSpannable
-import com.beust.klaxon.JsonObject
-import com.beust.klaxon.Parser
+import androidx.core.text.underline
 import dev.defvs.chatterz.darkenColor
 import dev.defvs.chatterz.lightenColor
 import dev.defvs.chatterz.twitch.TwitchAPI.getUserId
 import io.multimoon.colorful.Colorful
 import org.jibble.pircbot.PircBot
-import java.net.HttpURLConnection
-import java.net.URL
 import java.util.*
 
 
@@ -42,6 +39,13 @@ class ChatClient(
 	): Spannable {
 		with(message) {
 			val spannable = SpannableStringBuilder()
+			
+			if (isChatEvent) {
+				tags.find { it.name == "system-msg" }?.data?.let {
+					spannable.bold { underline { append(it) } }
+					spannable.append("\n")
+				}
+			}
 			
 			val color =
 				if (Colorful().getDarkTheme()) sender.color?.lightenColor() else sender.color?.darkenColor()
@@ -105,15 +109,15 @@ class ChatClient(
 	override fun handleLine(line: String?) {
 		super.handleLine(line)
 		Log.d("[IN]ChatClient", "$line")
-		serverResponseEvent?.invoke(line)
+		serverResponseCallback?.invoke(line)
 		if (line == null) return
 		
 		val tags = TwitchMessageTag.parseTags(line)
 		
-		if (line.contains("PRIVMSG")) {
+		if (line.contains("PRIVMSG") || line.contains("USERNOTICE")) {
 			val message = line.substringAfter("PRIVMSG").trim().substringAfter(" :")
 			val sender = line.substringBefore(".tmi.twitch.tv").substringAfterLast("@").trim()
-			receiveMessage(TwitchMessage(sender, message, tags))
+			receiveMessage(TwitchMessage(sender, message, tags, line.contains("USERNOTICE")))
 		}
 		
 	}
@@ -124,18 +128,18 @@ class ChatClient(
 	}
 	
 	private fun receiveMessage(message: TwitchMessage) {
-		messageReceivedEvent?.invoke(message)
+		messageReceivedCallback?.invoke(message)
 	}
 	
 	override fun onDisconnect() {
-		disconnectedEvent?.invoke()
+		disconnectedCallback?.invoke()
 	}
 	
 	fun sendMessage(message: String) = sendLine("PRIVMSG $ircChannel :$message")
 	
-	var messageReceivedEvent: ((message: TwitchMessage) -> Unit)? = null
-	var disconnectedEvent: (() -> Unit)? = null
-	var serverResponseEvent: ((response: String?) -> Unit)? = null
+	var messageReceivedCallback: ((message: TwitchMessage) -> Unit)? = null
+	var disconnectedCallback: (() -> Unit)? = null
+	var serverResponseCallback: ((response: String?) -> Unit)? = null
 	
 	fun shutdown() {
 		partChannel(ircChannel)

@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Color
-import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Bundle
@@ -25,9 +24,7 @@ import co.zsmb.materialdrawerkt.builders.drawer
 import co.zsmb.materialdrawerkt.builders.footer
 import co.zsmb.materialdrawerkt.draweritems.badgeable.primaryItem
 import co.zsmb.materialdrawerkt.draweritems.divider
-import co.zsmb.materialdrawerkt.imageloader.drawerImageLoader
 import com.google.android.material.snackbar.Snackbar
-import com.mikepenz.materialdrawer.util.DrawerUIUtils
 import com.otaliastudios.autocomplete.Autocomplete
 import com.otaliastudios.autocomplete.AutocompleteCallback
 import com.otaliastudios.autocomplete.CharPolicy
@@ -47,8 +44,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
-import java.net.HttpURLConnection
-import java.net.URL
 import kotlin.math.roundToInt
 import dev.defvs.chatterz.MainActivity.Companion.sharedPreferences as preferences
 
@@ -99,7 +94,7 @@ class MainActivity : ThemedActivity() {
 		
 		chatViewManager = LinearLayoutManager(this)
 		chatViewAdapter =
-			ChatAdapter(messages, this) { chatViewManager.scrollTo(this, messages.size - 1) }
+			ChatAdapter(messages, this) { scrollToBottom() }
 		chatRecyclerView = chatRecycler.apply {
 			setHasFixedSize(true)
 			descendantFocusability
@@ -251,22 +246,6 @@ class MainActivity : ThemedActivity() {
 		ChannelConnectDialog(::connectToChannel).show(supportFragmentManager, "channelConnect")
 	}
 	
-	override fun onSaveInstanceState(outState: Bundle) {
-		outState.run {
-			putParcelableArrayList("messages", messages)
-		}
-		
-		super.onSaveInstanceState(outState)
-	}
-	
-	override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-		savedInstanceState.getParcelableArrayList<TwitchMessage>("messages")?.let {
-			messages.addAll(it)
-		}
-		
-		super.onRestoreInstanceState(savedInstanceState)
-	}
-	
 	override fun onStop() {
 		chatClient?.shutdown()
 		super.onStop()
@@ -296,7 +275,8 @@ class MainActivity : ThemedActivity() {
 	
 	private fun connectToOwnChannel() = sharedPreferences.getString("twitch_username", null).nullIfEmpty()?.let { connectToChannel(it) }
 	
-	private fun connectToLastChannel() = sharedPreferences.getString("twitch_last_channel", null).nullIfEmpty()?.let { connectToChannel(it) }
+	private fun connectToLastChannel() =
+		sharedPreferences.getString("twitch_last_channel", null).nullIfEmpty()?.let { connectToChannel(it) }
 	
 	private fun connectToLastOrOwn() = connectToLastChannel() ?: connectToOwnChannel() ?: showSnackbar(
 		R.string.empty_username,
@@ -328,13 +308,13 @@ class MainActivity : ThemedActivity() {
 						twitchAPIKey,
 						channel
 					).apply {
-						messageReceivedEvent = {
+						messageReceivedCallback = {
 							runOnUiThread {
 								onMessage(it)
 							}
 						}
 						
-						disconnectedEvent = {
+						disconnectedCallback = {
 							runOnUiThread {
 								supportActionBar?.title =
 									getString(R.string.disconnected_from, channel)
@@ -409,10 +389,14 @@ class MainActivity : ThemedActivity() {
 		else -> super.onOptionsItemSelected(item)
 	}
 	
+	private fun scrollToBottom() {
+		chatViewManager.scrollTo(this, messages.size - 1)
+	}
+	
 	private fun onMessage(message: TwitchMessage) {
 		messages.add(message)
 		chatViewAdapter.notifyItemInserted(messages.size - 1)
-		chatViewManager.scrollTo(this, messages.size - 1)
+		scrollToBottom()
 	}
 	
 	private fun sendMessage(message: String) {
@@ -422,7 +406,7 @@ class MainActivity : ThemedActivity() {
 		
 		messages.add(TwitchMessage(chatClient!!.username, message))
 		chatViewAdapter.notifyItemInserted(messages.size - 1)
-		chatViewManager.scrollTo(this, messages.size - 1)
+		scrollToBottom()
 		
 		messageBox.clear()
 	}
@@ -486,7 +470,12 @@ class ChatAdapter(
 			TypedValue.COMPLEX_UNIT_SP,
 			(14.0f) * (preferences.getInt("textsize_multiplier", 100) / 100f)
 		)
-		with(messages[i]) { holder.messageText.text = "${sender.displayName}: $message" }
+		with(messages[i]) {
+			holder.messageText.text = if (isChatEvent)
+				"${tags.find { it.name == "system-msg" }?.data}\n" +
+						"$sender: $message"
+			else "$sender: $message"
+		}
 		GlobalScope.launch {
 			try {
 				val spannable = chatClient?.getMessageSpannable(
