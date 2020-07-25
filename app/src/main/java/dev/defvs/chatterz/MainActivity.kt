@@ -166,7 +166,7 @@ class MainActivity : ThemedActivity() {
 					if (editable == null || item == null) return false
 					val range =
 						CharPolicy.getQueryRange(editable)?.let { it[0]..it[1] } ?: return false
-					editable.replace(range.first - 1, range.last, item.name)
+					editable.replace(range.first - 1, range.last, item.name + " ")
 					return true
 				}
 				
