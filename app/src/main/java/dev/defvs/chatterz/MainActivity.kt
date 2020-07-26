@@ -322,11 +322,33 @@ class MainActivity : ThemedActivity() {
 				chatClient?.shutdown()
 				
 				try {
+					runOnUiThread {
+						menu?.findItem(R.id.connect_chat)?.apply {
+							setIcon(R.drawable.ic_refresh_24)
+							title = getString(R.string.action_reconnect)
+						}
+						messageBox.isEnabled = true
+						disconnectedHint.text = getString(R.string.loading_emotes)
+						
+						supportActionBar?.title = getString(R.string.loading_emotes_with_emoji)
+					}
+					channelEmotes = getUserId(twitchAPIKey, channel)
+						?.let {
+							CompletableTwitchEmote.getAllEmotes(
+								it,
+								twitchAPIKey,
+								token,
+								username
+							)
+						} ?: listOf()
+					autoCompletePresenter.emotes = channelEmotes!!
+					
 					chatClient = ChatClient(
 						username,
 						token,
 						twitchAPIKey,
-						channel
+						channel,
+						channelEmotes!!
 					).apply {
 						messageReceivedCallback = {
 							runOnUiThread {
@@ -349,26 +371,6 @@ class MainActivity : ThemedActivity() {
 							}
 						}
 					}
-					runOnUiThread {
-						menu?.findItem(R.id.connect_chat)?.apply {
-							setIcon(R.drawable.ic_refresh_24)
-							title = getString(R.string.action_reconnect)
-						}
-						messageBox.isEnabled = true
-						disconnectedHint.text = getString(R.string.loading_emotes)
-						
-						supportActionBar?.title = getString(R.string.loading_emotes_with_emoji)
-					}
-					channelEmotes = getUserId(twitchAPIKey, channel)
-						?.let {
-							CompletableTwitchEmote.getAllEmotes(
-								it,
-								twitchAPIKey,
-								token,
-								username
-							)
-						}
-					autoCompletePresenter.emotes = channelEmotes ?: listOf()
 					runOnUiThread {
 						supportActionBar?.title = getString(R.string.connected_to, channel)
 						disconnectedHint.visibility = View.GONE
@@ -501,7 +503,7 @@ class ChatAdapter(
 				val spannable = chatClient?.getMessageSpannable(
 					context,
 					messages[i],
-					size = (56 * (preferences.getInt(
+					width = (56 * (preferences.getInt(
 						"textsize_multiplier",
 						100
 					) / 100f)).roundToInt()

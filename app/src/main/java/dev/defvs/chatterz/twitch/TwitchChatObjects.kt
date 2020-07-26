@@ -1,9 +1,6 @@
 package dev.defvs.chatterz.twitch
 
-import android.os.Parcel
-import android.os.Parcelable
 import dev.defvs.chatterz.nullIfEmpty
-import kotlinx.android.parcel.Parcelize
 
 data class TwitchMessage(
 	val sender: TwitchUser,

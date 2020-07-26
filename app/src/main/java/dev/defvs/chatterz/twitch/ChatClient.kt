@@ -9,9 +9,10 @@ import androidx.core.text.bold
 import androidx.core.text.color
 import androidx.core.text.toSpannable
 import androidx.core.text.underline
+import dev.defvs.chatterz.autocomplete.CompletableTwitchEmote
+import dev.defvs.chatterz.autocomplete.CompletableTwitchEmote.Companion.getEmoteSpannable
 import dev.defvs.chatterz.darkenColor
 import dev.defvs.chatterz.lightenColor
-import dev.defvs.chatterz.twitch.TwitchAPI.getUserId
 import io.multimoon.colorful.Colorful
 import org.jibble.pircbot.PircBot
 import java.util.*
@@ -22,20 +23,16 @@ class ChatClient(
 	private val oauthToken: String,
 	twitchAPIKey: String,
 	channel: String = username,
+	private val emotes: List<CompletableTwitchEmote>,
 	private val ircServer: String = "irc.chat.twitch.tv",
 	private val ircPort: Int = 6667
 ) : PircBot() {
 	private val ircChannel = "#${channel.toLowerCase(Locale.ROOT)}"
 	
-	val BTTVemotes = getUserId(twitchAPIKey, channel)?.let {
-		ChannelBTTVEmotes.getEmotesForChannel(it)
-	}
-	
 	suspend fun getMessageSpannable(
 		context: Context,
 		message: TwitchMessage,
-		bttvEmotes: ChannelBTTVEmotes? = BTTVemotes,
-		size: Int? = null
+		width: Int?
 	): Spannable {
 		with(message) {
 			val spannable = SpannableStringBuilder()
@@ -57,7 +54,7 @@ class ChatClient(
 								badges.getBadgedSpannable(
 									context,
 									sender.displayName ?: sender.username,
-									size
+									width
 								)
 							)
 						}
@@ -67,7 +64,7 @@ class ChatClient(
 						badges.getBadgedSpannable(
 							context,
 							sender.displayName ?: sender.username,
-							size
+							width
 						)
 					)
 				}
@@ -76,9 +73,9 @@ class ChatClient(
 			
 			var emoteSpan = SpannableString(this.message) as Spannable
 			emoteSpan = tags.find { it.name == "emotes" }?.data?.let { Emotes(it) }
-				?.getEmotedSpannable(context, emoteSpan, size) ?: emoteSpan
+				?.getEmotedSpannable(context, emoteSpan, width) ?: emoteSpan
 			
-			emoteSpan = bttvEmotes?.getEmotedSpannable(context, emoteSpan, size) ?: emoteSpan
+			emoteSpan = emotes.getEmoteSpannable(context, emoteSpan, width)
 			
 			if (isAction && color != null)
 				spannable.color(color) { append(emoteSpan) }

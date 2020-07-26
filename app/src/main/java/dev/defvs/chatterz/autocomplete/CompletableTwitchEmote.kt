@@ -4,10 +4,11 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
+import android.text.Spannable
+import android.text.style.ImageSpan
 import androidx.core.graphics.scale
 import com.beust.klaxon.Json
-import dev.defvs.chatterz.twitch.ChannelBTTVEmotes
-import dev.defvs.chatterz.twitch.TwitchAPI
+import dev.defvs.chatterz.twitch.*
 import java.net.URL
 
 data class CompletableTwitchEmote(
@@ -15,7 +16,11 @@ data class CompletableTwitchEmote(
 	val id: String,
 	val type: EmoteType
 ) {
-	suspend fun getDrawable(context: Context, apiSize: Int = 2, width: Int?): BitmapDrawable {
+	constructor(name: String, id: String, type: EmoteType, urls: Map<String, String>): this(name, id, type) {
+		this.urls = urls
+	}
+	var urls: Map<String, String>? = null
+	suspend fun getDrawable(context: Context, apiSize: Int = 2, width: Int? = null): BitmapDrawable {
 		val bitmap: Bitmap = TwitchEmoteCache.cache[this] ?: let {
 			val url: URL = when (type) {
 				EmoteType.BTTV -> {
@@ -23,6 +28,13 @@ data class CompletableTwitchEmote(
 				}
 				EmoteType.TWITCH -> {
 					URL("https://static-cdn.jtvnw.net/emoticons/v1/$id/${apiSize.coerceIn(1..3)}.0")
+				}
+				EmoteType.FFZ -> {
+					urls ?: throw NullPointerException("Type is FFZ and urls are null")
+					val url = if (apiSize.coerceIn(1..3) == 3) {
+						urls!![4.toString()]
+					} else urls!![apiSize.coerceIn(1..2).toString()]
+					URL("https:" + (url ?: urls!!.values.first()))
 				}
 			}
 			BitmapFactory.decodeStream(url.openConnection().apply { useCaches = true }
@@ -42,6 +54,28 @@ data class CompletableTwitchEmote(
 	}
 	
 	companion object {
+		suspend fun List<CompletableTwitchEmote>.getEmoteSpannable(context: Context, spannable: Spannable, width: Int?, apiSize: Int = 2): Spannable {
+			this.filter { it.type == EmoteType.BTTV || it.type == EmoteType.FFZ }.forEach {
+				spannable.mapIndexed { index, _ -> spannable.indexOf(it.name, index) }
+					.filter { it in 0 until spannable.length }.forEach { start ->
+						val emote = it.getDrawable(
+							context,
+							apiSize,
+							width
+						)
+						val image = ImageSpan(emote, ImageSpan.ALIGN_BASELINE)
+						val end = start + it.name.length
+						spannable.setSpan(
+							image,
+							start,
+							end,
+							Spannable.SPAN_INCLUSIVE_EXCLUSIVE
+						)
+					}
+			}
+			return spannable
+		}
+		
 		fun getAllEmotes(
 			channelId: String,
 			apiKey: String,
@@ -51,7 +85,7 @@ data class CompletableTwitchEmote(
 			val list = arrayListOf<CompletableTwitchEmote>()
 			
 			// BTTV
-			list.addAll(ChannelBTTVEmotes.getEmotesForChannel(channelId).getAllEmotes()
+			list.addAll(ChannelBTTVEmotes.getEmotesForChannel(channelId).allEmotes
 				.map {
 					CompletableTwitchEmote(
 						it.name,
@@ -69,6 +103,16 @@ data class CompletableTwitchEmote(
 				)
 			)
 			
+			// FFZ
+			list.addAll(ChannelFFZEmote.getEmotesForChannel(channelId).allEmotes.map {
+				CompletableTwitchEmote(
+					it.name,
+					it.id.toString(),
+					EmoteType.FFZ,
+					it.urls
+				)
+			})
+			
 			return list
 		}
 	}
@@ -77,4 +121,4 @@ data class CompletableTwitchEmote(
 data class TwitchEmotesResponse(@Json(name = "emoticon_sets") val emoteSets: Map<String, ArrayList<EmoticonSet>>)
 data class EmoticonSet(val code: String, val id: Int)
 
-enum class EmoteType { BTTV, TWITCH }
+enum class EmoteType { FFZ, BTTV, TWITCH }

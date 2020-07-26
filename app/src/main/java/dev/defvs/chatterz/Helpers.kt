@@ -32,11 +32,4 @@ fun Int.darkenColor(): Int {
 	return Color.HSVToColor(hsv)
 }
 
-fun Context.dimensionFromAttribute(attribute: Int): Int {
-	val attributes = obtainStyledAttributes(intArrayOf(attribute))
-	val dimension = attributes.getDimensionPixelSize(0, 0)
-	attributes.recycle()
-	return dimension
-}
-
 fun String?.nullIfEmpty(): String? = if (this.isNullOrBlank()) null else this

@@ -15,32 +15,7 @@ data class ChannelBTTVEmotes(
 	val sharedEmotes: List<BTTVEmote>,
 	@Json(ignored = true) var globalEmotes: List<BTTVEmote> = listOf()
 ) {
-	fun getAllEmotes() = channelEmotes + sharedEmotes + globalEmotes
-	
-	suspend fun getEmotedSpannable(
-		context: Context,
-		spannable: Spannable,
-		width: Int? = null
-	): Spannable {
-		getAllEmotes().forEach {
-			spannable.mapIndexed { index, _ -> spannable.indexOf(it.name, index) }
-				.filter { it in 0 until spannable.length }.forEach { start ->
-				val emote = CompletableTwitchEmote(it.name, it.id, EmoteType.BTTV).getDrawable(
-					context,
-					width = width
-				)
-				val image = ImageSpan(emote, ImageSpan.ALIGN_BASELINE)
-				val end = start + it.name.length
-				spannable.setSpan(
-					image,
-					start,
-					end,
-					Spannable.SPAN_INCLUSIVE_EXCLUSIVE
-				)
-			}
-		}
-		return spannable
-	}
+	val allEmotes: List<BTTVEmote> get() = channelEmotes + sharedEmotes + globalEmotes
 	
 	companion object {
 		fun getEmotesForChannel(channelId: String): ChannelBTTVEmotes {

@@ -45,7 +45,7 @@ class ColorPickerPreference(context: Context?, attrs: AttributeSet?) :
 	}
 }
 
-class ColorPickerDialog() : PreferenceDialogFragmentCompat() {
+class ColorPickerDialog : PreferenceDialogFragmentCompat() {
 	
 	private lateinit var recyclerView: RecyclerView
 	private lateinit var colorListAdapter: ColorListAdapter

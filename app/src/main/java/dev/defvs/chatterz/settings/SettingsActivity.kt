@@ -2,10 +2,8 @@ package dev.defvs.chatterz.settings
 
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.view.View
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.SeekBarPreference
 import dev.defvs.chatterz.MainActivity
 import dev.defvs.chatterz.R
 import dev.defvs.chatterz.themes.ThemedActivity
