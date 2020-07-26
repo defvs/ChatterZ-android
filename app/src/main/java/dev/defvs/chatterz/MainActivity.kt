@@ -410,7 +410,7 @@ class MainActivity : ThemedActivity() {
 	}
 	
 	private fun scrollToBottom() {
-		if (autoScroll) chatViewManager.scrollTo(this, messages.size - 1)
+		if (autoScroll && messages.isNotEmpty()) chatViewManager.scrollTo(this, messages.size - 1)
 	}
 	
 	private fun onMessage(message: TwitchMessage) {
