@@ -21,7 +21,6 @@ import java.util.*
 class ChatClient(
 	val username: String,
 	private val oauthToken: String,
-	twitchAPIKey: String,
 	channel: String = username,
 	private val emotes: List<CompletableTwitchEmote>,
 	private val ircServer: String = "irc.chat.twitch.tv",
@@ -39,8 +38,8 @@ class ChatClient(
 			
 			if (isChatEvent) {
 				tags.find { it.name == "system-msg" }?.data?.let {
-					spannable.bold { underline { append(it) } }
-					spannable.append("\n")
+					spannable.bold { underline { append(it.replace("\\s", " ")) } }
+					if (message.message.isNotBlank()) spannable.append("\n")
 				}
 			}
 			
@@ -113,7 +112,7 @@ class ChatClient(
 		val tags = TwitchMessageTag.parseTags(line)
 		
 		if (line.contains("PRIVMSG") || line.contains("USERNOTICE")) {
-			val message = line.substringAfter("PRIVMSG").trim().substringAfter(" :")
+			val message = line.substringAfter("PRIVMSG").substringAfter("USERNOTICE").trim().substringAfter(ircChannel).substringAfter(" :")
 			val sender = line.substringBefore(".tmi.twitch.tv").substringAfterLast("@").trim()
 			receiveMessage(TwitchMessage(sender, message, tags, line.contains("USERNOTICE")))
 		}

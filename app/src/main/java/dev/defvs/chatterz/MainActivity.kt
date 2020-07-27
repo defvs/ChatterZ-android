@@ -346,7 +346,6 @@ class MainActivity : ThemedActivity() {
 					chatClient = ChatClient(
 						username,
 						token,
-						twitchAPIKey,
 						channel,
 						channelEmotes!!
 					).apply {
@@ -460,7 +459,7 @@ class MainActivity : ThemedActivity() {
 				"?client_id=${clientId}" +
 				"&redirect_uri=https://chatterz.live/twitch-oauth" +
 				"&response_type=token" +
-				"&scope=user_read chat:edit chat:read" +
+				"&scope=user_read user_subscriptions chat:edit chat:read" +
 				"&force_verify=true"
 		startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
 	}

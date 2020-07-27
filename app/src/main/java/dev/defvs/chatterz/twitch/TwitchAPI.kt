@@ -18,7 +18,7 @@ object TwitchAPI {
 	) = (url.openConnection() as HttpURLConnection).apply {
 		setRequestProperty("Accept", "application/vnd.twitchtv.v5+json")
 		setRequestProperty("Client-ID", apiKey)
-		oauthToken?.let { setRequestProperty("Authorization", "OAuth $oauthToken") }
+		oauthToken?.let { setRequestProperty("Authorization", "OAuth $it") }
 	}
 	
 	private val userIdCache: MutableMap<String /* username */, String /* id */> = mutableMapOf()
@@ -34,7 +34,7 @@ object TwitchAPI {
 							userIdCache[username] = it
 						}
 					}
-			else let {_ ->
+			else let { _ ->
 				Log.w("TwitchAPI", "Failed to get user id for $username: response was ${it.responseCode} ${it.responseMessage}")
 				null
 			}
