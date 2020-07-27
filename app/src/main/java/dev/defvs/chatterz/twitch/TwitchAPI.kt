@@ -1,5 +1,6 @@
 package dev.defvs.chatterz.twitch
 
+import android.util.Log
 import com.beust.klaxon.JsonObject
 import com.beust.klaxon.Klaxon
 import com.beust.klaxon.Parser
@@ -14,34 +15,40 @@ object TwitchAPI {
 		url: URL,
 		apiKey: String,
 		oauthToken: String? = null
-	): HttpURLConnection? {
-		val data: HttpURLConnection = (url.openConnection() as HttpURLConnection).apply {
-			setRequestProperty("Accept", "application/vnd.twitchtv.v5+json")
-			setRequestProperty("Client-ID", apiKey)
-			oauthToken?.let { setRequestProperty("Authorization", "OAuth $oauthToken") }
-		}
-		
-		if (data.responseCode != 200) return null
-		return data
+	) = (url.openConnection() as HttpURLConnection).apply {
+		setRequestProperty("Accept", "application/vnd.twitchtv.v5+json")
+		setRequestProperty("Client-ID", apiKey)
+		oauthToken?.let { setRequestProperty("Authorization", "OAuth $oauthToken") }
 	}
 	
 	private val userIdCache: MutableMap<String /* username */, String /* id */> = mutableMapOf()
 	fun getUserId(apiKey: String, username: String): String? {
 		userIdCache[username]?.let { return it } // return cached ID
 		
-		return getFromAPI(URL("https://api.twitch.tv/kraken/users?login=$username"), apiKey)?.let {
-			(Parser.default().parse(it.inputStream) as? JsonObject)
-				?.array<JsonObject>("users")?.getOrNull(0)?.string("_id")
-				.also {
-					if (it != null) {
-						userIdCache[username] = it
+		return getFromAPI(URL("https://api.twitch.tv/kraken/users?login=$username"), apiKey).let {
+			if (it.responseCode == 200)
+				(Parser.default().parse(it.inputStream) as? JsonObject)
+					?.array<JsonObject>("users")?.getOrNull(0)?.string("_id")
+					.also {
+						if (it != null) {
+							userIdCache[username] = it
+						}
 					}
-				}
+			else let {_ ->
+				Log.w("TwitchAPI", "Failed to get user id for $username: response was ${it.responseCode} ${it.responseMessage}")
+				null
+			}
 		}
 	}
 	
 	fun getUserInfo(apiKey: String, oauthToken: String) = getFromAPI(URL("https://api.twitch.tv/kraken/user"), apiKey, oauthToken)
-		?.let { (Parser.default().parse(it.inputStream) as? JsonObject) }
+		.let {
+			if (it.responseCode == 200) (Parser.default().parse(it.inputStream) as? JsonObject)
+			else let { _ ->
+				Log.w("TwitchAPI", "Failed to fetch user info. Response was ${it.responseCode} ${it.responseMessage}")
+				null
+			}
+		}
 	
 	fun getUsername(apiKey: String, oauthToken: String) = getUserInfo(apiKey, oauthToken)?.string("name")
 	fun getUserIconURL(apiKey: String, oauthToken: String) = getUserInfo(apiKey, oauthToken)?.string("logo")
@@ -53,12 +60,18 @@ object TwitchAPI {
 	): List<CompletableTwitchEmote> {
 		val userId = getUserId(apiKey, username)
 		val connection = getFromAPI(URL("https://api.twitch.tv/kraken/users/$userId/emotes"), apiKey, oauthToken)
-		return if (connection != null) {
+		return if (connection.responseCode == 200) {
 			Klaxon().parse<TwitchEmotesResponse>(connection.inputStream)?.emoteSets?.map { it.value }
 				?.flatten()
 				?.map { CompletableTwitchEmote(it.code, it.id.toString(), EmoteType.TWITCH) }
-				?: listOf()
-		} else listOf()
+				?: let { Log.w("TwitchEmotesLoader", "Incorrect Response."); listOf<CompletableTwitchEmote>() }
+		} else let {
+			Log.w(
+				"TwitchEmotesLoader",
+				"Failed to fetch Twitch emotes for channel $username: response was ${connection.responseCode} ${connection.responseMessage}"
+			)
+			listOf<CompletableTwitchEmote>()
+		}
 	}
 	
 }
