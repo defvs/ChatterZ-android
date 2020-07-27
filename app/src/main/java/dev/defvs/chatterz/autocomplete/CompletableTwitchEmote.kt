@@ -10,6 +10,7 @@ import androidx.core.graphics.scale
 import com.beust.klaxon.Json
 import dev.defvs.chatterz.twitch.*
 import java.net.URL
+import kotlin.math.roundToInt
 
 data class CompletableTwitchEmote(
 	val name: String,
@@ -20,7 +21,7 @@ data class CompletableTwitchEmote(
 		this.urls = urls
 	}
 	var urls: Map<String, String>? = null
-	suspend fun getDrawable(context: Context, apiSize: Int = 2, width: Int? = null): BitmapDrawable {
+	suspend fun getDrawable(context: Context, apiSize: Int = 3, height: Int? = null): BitmapDrawable {
 		val bitmap: Bitmap = TwitchEmoteCache.cache[this] ?: let {
 			val url: URL = when (type) {
 				EmoteType.BTTV -> {
@@ -41,14 +42,17 @@ data class CompletableTwitchEmote(
 				.getInputStream()).also { TwitchEmoteCache.cache[this] = it }
 		}
 		
+		val scaleRatio = height?.div(bitmap.height.toFloat())
 		return BitmapDrawable(
 			context.resources,
-			width?.let { bitmap.scale(it, it) } ?: bitmap).apply {
+			height?.let {
+				bitmap.scale((bitmap.width * scaleRatio!!).roundToInt(), (bitmap.height * scaleRatio).roundToInt())
+			} ?: bitmap).apply {
 			setBounds(
 				0,
 				0,
-				width ?: bitmap.width,
-				width ?: bitmap.height
+				(scaleRatio?.times(bitmap.width))?.roundToInt() ?: bitmap.width,
+				(scaleRatio?.times(bitmap.height))?.roundToInt() ?: bitmap.height
 			)
 		}
 	}
