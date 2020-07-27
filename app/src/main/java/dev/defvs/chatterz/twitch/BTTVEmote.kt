@@ -3,6 +3,7 @@ package dev.defvs.chatterz.twitch
 import android.content.Context
 import android.text.Spannable
 import android.text.style.ImageSpan
+import android.util.Log
 import com.beust.klaxon.Json
 import com.beust.klaxon.Klaxon
 import dev.defvs.chatterz.autocomplete.CompletableTwitchEmote
@@ -24,9 +25,21 @@ data class ChannelBTTVEmotes(
 			) ?: listOf()
 			val connection = URL("https://api.betterttv.net/3/cached/users/twitch/$channelId")
 				.openConnection() as HttpURLConnection
-			if (connection.responseCode != 200) return ChannelBTTVEmotes(listOf(), listOf(), global)
+			if (connection.responseCode != 200) return let {
+				Log.w(
+					"BTTVEmoteLoader",
+					"Failed to fetch emotes for $channelId: response was ${connection.responseCode} ${connection.responseMessage}"
+				)
+				ChannelBTTVEmotes(listOf(), listOf(), global)
+			}
 			return Klaxon().parse<ChannelBTTVEmotes>(connection.inputStream)?.apply { globalEmotes = global }
-				?: ChannelBTTVEmotes(listOf(), listOf(), global)
+				?: let {
+					Log.w(
+						"BTTVEmoteLoader",
+						"Failed to fetch emotes for $channelId: response was ${connection.responseCode} ${connection.responseMessage}"
+					)
+					ChannelBTTVEmotes(listOf(), listOf(), global)
+				}
 		}
 	}
 }
