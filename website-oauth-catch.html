@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+
+	<title>Twitch Login for ChatterZ</title>
+	<style>
+		.flex-container {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			height: 100%;
+			width: 100%;
+			flex-flow: column;
+		}
+		
+		h1 {
+		    text-align: center;
+		}
+
+		html, body {
+			height: 100%;
+			width: 100%;
+		}
+
+		input {
+			width: 80%
+		}
+	</style>
+</head>
+
+<body>
+	<div class="flex-container">
+		<h1>
+			Please retry logging in but open the link in ChatterZ instead<br>
+			OR<br>
+			Copy this OAuth token in the app settings, in the Debug section, "Twitch OAuth Token", and fill in your
+			username in "Twitch Username"
+		</h1>
+		<input type="text" value="An error occurred fetching the token, please retry!" readonly id="oauth">
+	</div>
+<script>
+     document.getElementById("oauth").value = document.location.hash.slice(1).split("&").find(element => element.includes("access_token")).split("=")[1];
+</script>
+</body>
+
+</html>
