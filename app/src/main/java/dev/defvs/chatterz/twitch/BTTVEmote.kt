@@ -25,7 +25,7 @@ data class ChannelBTTVEmotes(
 			val connection = URL("https://api.betterttv.net/3/cached/users/twitch/$channelId")
 				.openConnection() as HttpURLConnection
 			if (connection.responseCode != 200) return ChannelBTTVEmotes(listOf(), listOf(), global)
-			return Klaxon().parse<ChannelBTTVEmotes>(connection.inputStream)
+			return Klaxon().parse<ChannelBTTVEmotes>(connection.inputStream)?.apply { globalEmotes = global }
 				?: ChannelBTTVEmotes(listOf(), listOf(), global)
 		}
 	}
