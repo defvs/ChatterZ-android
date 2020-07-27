@@ -100,12 +100,13 @@ class ChatClient(
 		}
 		Log.d("ChatClient", "IRC connected")
 		sendLine("CAP REQ :twitch.tv/tags")
+		sendLine("CAP REQ :twitch.tv/commands")
 		joinChannel(ircChannel)
 	}
 	
 	override fun handleLine(line: String?) {
-		super.handleLine(line)
 		Log.d("[IN]ChatClient", "$line")
+		super.handleLine(line)
 		serverResponseCallback?.invoke(line)
 		if (line == null) return
 		
