@@ -6,11 +6,10 @@ data class TwitchMessage(
 	val sender: TwitchUser,
 	var message: String,
 	val tags: List<TwitchMessageTag>,
-	val isChatEvent: Boolean = false
+	val isChatEvent: Boolean = false,
+	val isOwnMessage: Boolean = false
 ) {
 	var isAction: Boolean
-	
-	constructor(sender: String, message: String, isChatEvent: Boolean = false) : this(TwitchUser(sender), message, listOf(), isChatEvent)
 	
 	constructor(sender: String, message: String, tags: List<TwitchMessageTag>, isChatEvent: Boolean = false) : this(
 		TwitchUser(

@@ -358,26 +358,22 @@ class MainActivity : ThemedActivity() {
 						
 						supportActionBar?.title = getString(R.string.loading_emotes_with_emoji)
 					}
-					try {
-						channelEmotes = getUserId(twitchAPIKey, channel)
-							?.let {
-								CompletableTwitchEmote.getAllEmotes(
-									it,
-									twitchAPIKey,
-									token,
-									username
-								)
-							} ?: listOf()
-						autoCompletePresenter.emotes = channelEmotes!!
-					} catch (e: IOException) {
-						Log.w("Emotes", "Fetch failed", e)
-					}
+					channelEmotes = getUserId(twitchAPIKey, channel)
+						?.let {
+							CompletableTwitchEmote.getAllEmotes(
+								it,
+								twitchAPIKey,
+								token,
+								username
+							)
+						} ?: listOf()
+					autoCompletePresenter.emotes = channelEmotes!!
 					
 					chatClient = ChatClient(
 						username,
 						token,
 						channel,
-						channelEmotes!!
+						channelEmotes ?: listOf()
 					).apply {
 						messageReceivedCallback = {
 							runOnUiThread {
@@ -459,7 +455,8 @@ class MainActivity : ThemedActivity() {
 			TwitchMessage(
 				TwitchUser(chatClient!!.username, chatClient?.userTags ?: listOf()),
 				message,
-				chatClient?.userTags ?: listOf()
+				chatClient?.userTags ?: listOf(),
+				isOwnMessage = true
 			)
 		)
 		chatViewAdapter.notifyItemInserted(messages.size - 1)

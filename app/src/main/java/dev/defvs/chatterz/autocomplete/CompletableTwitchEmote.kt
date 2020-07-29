@@ -65,9 +65,10 @@ data class CompletableTwitchEmote(
 			context: Context,
 			spannable: Spannable,
 			width: Int?,
-			apiSize: Int = 2
+			apiSize: Int = 2,
+			parseTwitchEmotes: Boolean
 		): Spannable {
-			this.filter { it.type == EmoteType.BTTV || it.type == EmoteType.FFZ }.forEach {
+			this.filter { it.type == EmoteType.BTTV || it.type == EmoteType.FFZ || (parseTwitchEmotes && it.type == EmoteType.TWITCH)}.forEach {
 				spannable.mapIndexed { index, _ -> spannable.indexOf(it.name, index) }
 					.filter { it in 0 until spannable.length }.forEach { start ->
 						val emote = it.getDrawable(

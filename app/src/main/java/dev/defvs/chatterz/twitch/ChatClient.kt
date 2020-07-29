@@ -74,7 +74,7 @@ class ChatClient(
 			emoteSpan = tags.find { it.name == "emotes" }?.data?.let { Emotes(it) }
 				?.getEmotedSpannable(context, emoteSpan, width) ?: emoteSpan
 			
-			emoteSpan = emotes.getEmoteSpannable(context, emoteSpan, width)
+			emoteSpan = emotes.getEmoteSpannable(context, emoteSpan, width, parseTwitchEmotes = true)
 			
 			if (isAction && color != null)
 				spannable.color(color) { append(emoteSpan) }
