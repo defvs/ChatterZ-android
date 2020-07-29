@@ -39,6 +39,7 @@ import dev.defvs.chatterz.twitch.ChatClient
 import dev.defvs.chatterz.twitch.TwitchAPI
 import dev.defvs.chatterz.twitch.TwitchAPI.getUserId
 import dev.defvs.chatterz.twitch.TwitchMessage
+import dev.defvs.chatterz.twitch.TwitchUser
 import io.multimoon.colorful.Colorful
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
@@ -69,7 +70,10 @@ class MainActivity : ThemedActivity() {
 	
 	private fun updateDrawer(username: String?, enableConnect: Boolean, enableConnectLast: Boolean) {
 		loggedItem?.withName(
-			if (enableConnect && !username.isNullOrBlank()) getString(R.string.logged_in_as, sharedPreferences.getString("twitch_username", null))
+			if (enableConnect && !username.isNullOrBlank()) getString(
+				R.string.logged_in_as,
+				sharedPreferences.getString("twitch_username", null)
+			)
 			else getString(R.string.logged_out)
 		)
 		connectSelfItem?.withEnabled(enableConnect)
@@ -354,16 +358,18 @@ class MainActivity : ThemedActivity() {
 						
 						supportActionBar?.title = getString(R.string.loading_emotes_with_emoji)
 					}
-					channelEmotes = getUserId(twitchAPIKey, channel)
-						?.let {
-							CompletableTwitchEmote.getAllEmotes(
-								it,
-								twitchAPIKey,
-								token,
-								username
-							)
-						} ?: listOf()
-					autoCompletePresenter.emotes = channelEmotes!!
+					try {
+						channelEmotes = getUserId(twitchAPIKey, channel)
+							?.let {
+								CompletableTwitchEmote.getAllEmotes(
+									it,
+									twitchAPIKey,
+									token,
+									username
+								)
+							} ?: listOf()
+						autoCompletePresenter.emotes = channelEmotes!!
+					} catch (e: IOException) {Log.w("Emotes", "Fetch failed", e)}
 					
 					chatClient = ChatClient(
 						username,
@@ -397,7 +403,7 @@ class MainActivity : ThemedActivity() {
 						disconnectedHint.visibility = View.GONE
 					}
 				} catch (e: IOException) {
-					Log.e("ChatClient", "Client init failed")
+					Log.e("ChatClient", "Client init failed", e)
 					showSnackbar(R.string.error_network)
 					runOnUiThread {
 						supportActionBar?.title =
@@ -447,7 +453,13 @@ class MainActivity : ThemedActivity() {
 		
 		chatClient!!.sendMessage(message)
 		
-		messages.add(TwitchMessage(chatClient!!.username, message))
+		messages.add(
+			TwitchMessage(
+				TwitchUser(chatClient!!.username, chatClient?.userTags ?: listOf()),
+				message,
+				chatClient?.userTags ?: listOf()
+			)
+		)
 		chatViewAdapter.notifyItemInserted(messages.size - 1)
 		scrollToBottom()
 		

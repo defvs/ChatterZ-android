@@ -9,6 +9,8 @@ import android.text.style.ImageSpan
 import androidx.core.graphics.scale
 import com.beust.klaxon.Json
 import dev.defvs.chatterz.twitch.*
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import java.net.URL
 import kotlin.math.roundToInt
 
@@ -17,9 +19,10 @@ data class CompletableTwitchEmote(
 	val id: String,
 	val type: EmoteType
 ) {
-	constructor(name: String, id: String, type: EmoteType, urls: Map<String, String>): this(name, id, type) {
+	constructor(name: String, id: String, type: EmoteType, urls: Map<String, String>) : this(name, id, type) {
 		this.urls = urls
 	}
+	
 	private var urls: Map<String, String>? = null
 	suspend fun getDrawable(context: Context, apiSize: Int = 3, height: Int? = null): BitmapDrawable {
 		val bitmap: Bitmap = TwitchEmoteCache.cache[this] ?: let {
@@ -58,7 +61,12 @@ data class CompletableTwitchEmote(
 	}
 	
 	companion object {
-		suspend fun List<CompletableTwitchEmote>.getEmoteSpannable(context: Context, spannable: Spannable, width: Int?, apiSize: Int = 2): Spannable {
+		suspend fun List<CompletableTwitchEmote>.getEmoteSpannable(
+			context: Context,
+			spannable: Spannable,
+			width: Int?,
+			apiSize: Int = 2
+		): Spannable {
 			this.filter { it.type == EmoteType.BTTV || it.type == EmoteType.FFZ }.forEach {
 				spannable.mapIndexed { index, _ -> spannable.indexOf(it.name, index) }
 					.filter { it in 0 until spannable.length }.forEach { start ->
@@ -80,44 +88,50 @@ data class CompletableTwitchEmote(
 			return spannable
 		}
 		
-		fun getAllEmotes(
+		suspend fun getAllEmotes(
 			channelId: String,
 			apiKey: String,
 			oauthId: String,
 			username: String
-		): List<CompletableTwitchEmote> {
+		): List<CompletableTwitchEmote> = coroutineScope {
 			val list = arrayListOf<CompletableTwitchEmote>()
 			
-			// BTTV
-			list.addAll(ChannelBTTVEmotes.getEmotesForChannel(channelId).allEmotes
-				.map {
-					CompletableTwitchEmote(
-						it.name,
-						it.id,
-						EmoteType.BTTV
-					)
-				})
-			
 			// TWITCH
-			list.addAll(
-				TwitchAPI.getTwitchEmotes(
-					apiKey,
-					oauthId,
-					username
+			launch {
+				list.addAll(
+					TwitchAPI.getTwitchEmotes(
+						apiKey,
+						oauthId,
+						username
+					)
 				)
-			)
+			}
+			
+			// BTTV
+			launch {
+				list.addAll(ChannelBTTVEmotes.getEmotesForChannel(channelId).allEmotes
+					.map {
+						CompletableTwitchEmote(
+							it.name,
+							it.id,
+							EmoteType.BTTV
+						)
+					})
+			}
 			
 			// FFZ
-			list.addAll(ChannelFFZEmote.getEmotesForChannel(channelId).allEmotes.map {
-				CompletableTwitchEmote(
-					it.name,
-					it.id.toString(),
-					EmoteType.FFZ,
-					it.urls
-				)
-			})
+			launch {
+				list.addAll(ChannelFFZEmote.getEmotesForChannel(channelId).allEmotes.map {
+					CompletableTwitchEmote(
+						it.name,
+						it.id.toString(),
+						EmoteType.FFZ,
+						it.urls
+					)
+				})
+			}
 			
-			return list
+			list
 		}
 	}
 }

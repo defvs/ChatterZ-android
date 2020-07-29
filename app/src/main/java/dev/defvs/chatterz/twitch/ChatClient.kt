@@ -117,7 +117,7 @@ class ChatClient(
 				val sender = line.substringBefore(".tmi.twitch.tv").substringAfterLast("@").trim()
 				receiveMessage(TwitchMessage(sender, message, tags, line.contains("USERNOTICE")))
 			}
-			line.contains("GLOBALUSERSTATE") -> {
+			line.contains("GLOBALUSERSTATE") || line.contains("USERSTATE") -> {
 				userTags = tags
 			}
 		}
