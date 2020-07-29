@@ -98,10 +98,10 @@ class ChatClient(
 			return
 		}
 		Log.d("ChatClient", "IRC connected")
-		sendLine("CAP REQ :twitch.tv/tags")
-		sendLine("CAP REQ :twitch.tv/commands")
 		joinChannel(ircChannel)
 	}
+	
+	var userTags = listOf<TwitchMessageTag>()
 	
 	override fun handleLine(line: String?) {
 		Log.d("[IN]ChatClient", "$line")
@@ -111,10 +111,15 @@ class ChatClient(
 		
 		val tags = TwitchMessageTag.parseTags(line)
 		
-		if (line.contains("PRIVMSG") || line.contains("USERNOTICE")) {
-			val message = line.substringAfter("PRIVMSG").substringAfter("USERNOTICE").trim().substringAfter(ircChannel).substringAfter(" :")
-			val sender = line.substringBefore(".tmi.twitch.tv").substringAfterLast("@").trim()
-			receiveMessage(TwitchMessage(sender, message, tags, line.contains("USERNOTICE")))
+		when {
+			line.contains("PRIVMSG") || line.contains("USERNOTICE") -> {
+				val message = line.substringAfter("PRIVMSG").substringAfter("USERNOTICE").trim().substringAfter(ircChannel).substringAfter(" :")
+				val sender = line.substringBefore(".tmi.twitch.tv").substringAfterLast("@").trim()
+				receiveMessage(TwitchMessage(sender, message, tags, line.contains("USERNOTICE")))
+			}
+			line.contains("GLOBALUSERSTATE") -> {
+				userTags = tags
+			}
 		}
 		
 	}
