@@ -1,14 +1,9 @@
 package dev.defvs.chatterz.twitch
 
-import android.content.Context
-import android.text.Spannable
-import android.text.style.ImageSpan
 import android.util.Log
 import com.beust.klaxon.Json
 import com.beust.klaxon.Klaxon
-import dev.defvs.chatterz.autocomplete.CompletableTwitchEmote
-import dev.defvs.chatterz.autocomplete.EmoteType
-import java.net.HttpURLConnection
+import dev.defvs.chatterz.openHttps
 import java.net.URL
 
 data class ChannelFFZEmote(
@@ -19,7 +14,7 @@ data class ChannelFFZEmote(
 	
 	companion object {
 		fun getEmotesForChannel(channelId: String): ChannelFFZEmote {
-			var connection = URL("https://api.frankerfacez.com/v1/set/global").openConnection() as HttpURLConnection
+			var connection = URL("https://api.frankerfacez.com/v1/set/global").openHttps()
 			val global = (if (connection.responseCode == 200)
 				Klaxon().parse<FFZGlobalSetResponse>(connection.inputStream)?.getDefaultSets()?.flatMap { it.emoticons }
 			else null) ?: let {
@@ -29,7 +24,7 @@ data class ChannelFFZEmote(
 				)
 				emptyList<FFZEmote>()
 			}
-			connection = URL("https://api.frankerfacez.com/v1/room/id/$channelId").openConnection() as HttpURLConnection
+			connection = URL("https://api.frankerfacez.com/v1/room/id/$channelId").openHttps()
 			val channel = (if (connection.responseCode == 200)
 				Klaxon().parse<FFZRoomResponse>(connection.inputStream)?.getEmotes()
 			else null) ?: let {

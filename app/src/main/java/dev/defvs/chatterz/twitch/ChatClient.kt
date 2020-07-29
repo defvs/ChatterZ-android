@@ -136,7 +136,7 @@ class ChatClient(
 	
 	var messageReceivedCallback: ((message: TwitchMessage) -> Unit)? = null
 	var disconnectedCallback: (() -> Unit)? = null
-	var serverResponseCallback: ((response: String?) -> Unit)? = null
+	private var serverResponseCallback: ((response: String?) -> Unit)? = null
 	
 	fun shutdown() {
 		partChannel(ircChannel)

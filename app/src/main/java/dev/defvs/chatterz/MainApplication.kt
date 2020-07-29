@@ -8,6 +8,7 @@ import io.multimoon.colorful.Defaults
 import io.multimoon.colorful.ThemeColor
 import io.multimoon.colorful.initColorful
 
+@Suppress("unused")
 class MainApplication : MultiDexApplication() {
 	
 	override fun attachBaseContext(base: Context?) {

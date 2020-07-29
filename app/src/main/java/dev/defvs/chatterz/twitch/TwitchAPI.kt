@@ -7,7 +7,7 @@ import com.beust.klaxon.Parser
 import dev.defvs.chatterz.autocomplete.CompletableTwitchEmote
 import dev.defvs.chatterz.autocomplete.EmoteType
 import dev.defvs.chatterz.autocomplete.TwitchEmotesResponse
-import java.net.HttpURLConnection
+import dev.defvs.chatterz.openHttps
 import java.net.URL
 
 object TwitchAPI {
@@ -15,7 +15,7 @@ object TwitchAPI {
 		url: URL,
 		apiKey: String,
 		oauthToken: String? = null
-	) = (url.openConnection() as HttpURLConnection).apply {
+	) = url.openHttps().apply {
 		setRequestProperty("Accept", "application/vnd.twitchtv.v5+json")
 		setRequestProperty("Client-ID", apiKey)
 		oauthToken?.let { setRequestProperty("Authorization", "OAuth $it") }
@@ -41,7 +41,7 @@ object TwitchAPI {
 		}
 	}
 	
-	fun getUserInfo(apiKey: String, oauthToken: String) = getFromAPI(URL("https://api.twitch.tv/kraken/user"), apiKey, oauthToken)
+	private fun getUserInfo(apiKey: String, oauthToken: String) = getFromAPI(URL("https://api.twitch.tv/kraken/user"), apiKey, oauthToken)
 		.let {
 			if (it.responseCode == 200) (Parser.default().parse(it.inputStream) as? JsonObject)
 			else let { _ ->

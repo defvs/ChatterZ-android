@@ -9,12 +9,9 @@
 	<string name="action_connect">Se connecter</string>
 	<string name="settings_twitch_token">Jeton Twitch OAuth</string>
 	<string name="debug_header">Débogage</string>
-	<string name="unknown_sender">Inconnu</string>
 	<string name="preferences_dark_theme">Thème sombre</string>
-	<string name="action_disconnect">Se déconnecter</string>
 	<string name="action_reconnect">Se reconnecter</string>
 	<string name="no_emotes_found">Aucune émote trouvée</string>
-	<string name="emote_image_descriptor">Image de l\'émote</string>
 	<string name="connecting_to_with_emoji">🕸 Connexion à %1$s</string>
 	<string name="loading_emotes_with_emoji">🕸 Chargement des émotes</string>
 	<string name="connecting_to">Connexion à %1$s…</string>
@@ -24,7 +21,6 @@
 	<string name="action_send">Envoyer</string>
 	<string name="message_box_hint">Entrez vos messages ici…</string>
 	<string name="action_login">Se connecter</string>
-	<string name="action_login_twitch">Se connecter à Twitch</string>
 	<string name="settings_last_channel">Dernière chaine</string>
 	<string name="settings_twitch_username">Nom d\'utilisateur Twitch</string>
 	<string name="connect_to">Se connecter à…</string>
@@ -35,4 +31,7 @@
 	<string name="error_login">Un problème est survennu durant la connexion. Veuillez réessayer.</string>
 	<string name="error_network">Problème de réseau. Vérifiez la connexion et réessayez.</string>
 	<string name="connection_failed">Echec de la connection</string>
+	<string name="description_enable_autoscroll">Activer le défilement automatique</string>
+	<string name="logged_in_as">Connecté en tant que %1$s</string>
+	<string name="logged_out">Déconnecté</string>
 </resources>

@@ -38,7 +38,7 @@ data class TwitchUser(
 		fromTags(tags)
 	}
 	
-	fun fromTags(tags: List<TwitchMessageTag>) {
+	private fun fromTags(tags: List<TwitchMessageTag>) {
 		isMod = tags.find { it.name == "mod" }?.data?.let { Mod(it).isMod } ?: false
 		color = tags.find { it.name == "color" }?.data?.let { Color(it).color }
 		displayName =

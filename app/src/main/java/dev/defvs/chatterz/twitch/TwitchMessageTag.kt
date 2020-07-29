@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.text.Spannable
-import android.text.SpannableString
 import android.text.SpannableStringBuilder
 import android.text.style.ImageSpan
 import androidx.core.content.ContextCompat
@@ -33,7 +32,7 @@ open class TwitchMessageTag(
 data class Badges(
 	override val data: String
 ) : TwitchMessageTag("badges", data) {
-	val badges: List<Badge>
+	private val badges: List<Badge>
 		get() = data.split(',')
 			.map { Badge(it.substringBefore('/'), it.substringAfter('/')) }
 	
@@ -73,7 +72,7 @@ data class Badge(val name: String, val version: String? = null, val imageUrl: St
 data class Emotes(
 	override val data: String
 ) : TwitchMessageTag("emotes", data) {
-	val emotes: ArrayList<Emote>
+	private val emotes: ArrayList<Emote>
 		get() {
 			val emotes = arrayListOf<Emote>()
 			if (data.isBlank()) return emotes
@@ -95,9 +94,6 @@ data class Emotes(
 			
 			return emotes
 		}
-	
-	suspend fun getEmotedSpannable(context: Context, message: TwitchMessage) =
-		getEmotedSpannable(context, SpannableString(message.message))
 	
 	suspend fun getEmotedSpannable(context: Context, spannable: Spannable, width: Int? = null): Spannable {
 		emotes.forEach {

@@ -20,7 +20,7 @@ data class CompletableTwitchEmote(
 	constructor(name: String, id: String, type: EmoteType, urls: Map<String, String>): this(name, id, type) {
 		this.urls = urls
 	}
-	var urls: Map<String, String>? = null
+	private var urls: Map<String, String>? = null
 	suspend fun getDrawable(context: Context, apiSize: Int = 3, height: Int? = null): BitmapDrawable {
 		val bitmap: Bitmap = TwitchEmoteCache.cache[this] ?: let {
 			val url: URL = when (type) {

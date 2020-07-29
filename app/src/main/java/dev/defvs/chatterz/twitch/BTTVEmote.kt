@@ -1,14 +1,9 @@
 package dev.defvs.chatterz.twitch
 
-import android.content.Context
-import android.text.Spannable
-import android.text.style.ImageSpan
 import android.util.Log
 import com.beust.klaxon.Json
 import com.beust.klaxon.Klaxon
-import dev.defvs.chatterz.autocomplete.CompletableTwitchEmote
-import dev.defvs.chatterz.autocomplete.EmoteType
-import java.net.HttpURLConnection
+import dev.defvs.chatterz.openHttps
 import java.net.URL
 
 data class ChannelBTTVEmotes(
@@ -24,7 +19,7 @@ data class ChannelBTTVEmotes(
 				URL("https://api.betterttv.net/3/cached/emotes/global").openStream()
 			) ?: listOf()
 			val connection = URL("https://api.betterttv.net/3/cached/users/twitch/$channelId")
-				.openConnection() as HttpURLConnection
+				.openHttps()
 			if (connection.responseCode != 200) return let {
 				Log.w(
 					"BTTVEmoteLoader",

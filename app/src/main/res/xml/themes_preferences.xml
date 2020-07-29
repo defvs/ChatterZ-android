@@ -10,7 +10,6 @@
 		app:key="dark_theme"
 		app:title="@string/preferences_dark_theme" />
 	<SeekBarPreference
-		android:id="@+id/textsize_multiplier_seekbar"
 		app:defaultValue="100"
 		app:min="20"
 		android:max="400"

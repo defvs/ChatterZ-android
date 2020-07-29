@@ -25,6 +25,8 @@ import co.zsmb.materialdrawerkt.builders.footer
 import co.zsmb.materialdrawerkt.draweritems.badgeable.primaryItem
 import co.zsmb.materialdrawerkt.draweritems.divider
 import com.google.android.material.snackbar.Snackbar
+import com.mikepenz.materialdrawer.Drawer
+import com.mikepenz.materialdrawer.model.PrimaryDrawerItem
 import com.otaliastudios.autocomplete.Autocomplete
 import com.otaliastudios.autocomplete.AutocompleteCallback
 import com.otaliastudios.autocomplete.CharPolicy
@@ -53,7 +55,7 @@ class MainActivity : ThemedActivity() {
 	private lateinit var chatViewAdapter: RecyclerView.Adapter<*>
 	private lateinit var chatViewManager: RecyclerView.LayoutManager
 	
-	private var autoScroll: Boolean = false
+	private var autoScroll: Boolean = true
 		set(value) {
 			field = value
 			if (value) {
@@ -65,6 +67,17 @@ class MainActivity : ThemedActivity() {
 	private val clientId: String
 		get() = getString(R.string.twitch_client_id)
 	
+	private fun updateDrawer(username: String?, enableConnect: Boolean, enableConnectLast: Boolean) {
+		loggedItem?.withName(
+			if (enableConnect && !username.isNullOrBlank()) getString(R.string.logged_in_as, sharedPreferences.getString("twitch_username", null))
+			else getString(R.string.logged_out)
+		)
+		connectSelfItem?.withEnabled(enableConnect)
+		connectLastItem?.withEnabled(enableConnect && enableConnectLast)
+		connectCustomItem?.withEnabled(enableConnect)
+		drawer.updateItems(loggedItem, connectSelfItem, connectLastItem, connectCustomItem)
+	}
+	
 	private val sharedPreferencesListener =
 		SharedPreferences.OnSharedPreferenceChangeListener { pref, s ->
 			when (s) {
@@ -74,8 +87,9 @@ class MainActivity : ThemedActivity() {
 					.apply(this) {
 						this.recreate()
 					}
-				"twitch_last_channel", "twitch_token" -> {
-					setupDrawer(
+				"twitch_last_channel", "twitch_token", "twitch_username" -> {
+					updateDrawer(
+						pref.getString("twitch_username", ""),
 						!pref.getString("twitch_token", null).isNullOrBlank(),
 						!pref.getString("twitch_last_channel", null).isNullOrBlank()
 					)
@@ -112,6 +126,7 @@ class MainActivity : ThemedActivity() {
 		}
 		
 		scrollFab.setOnClickListener { autoScroll = true }
+		autoScroll = true
 		
 		sendButton.setOnClickListener { sendMessage(messageBox.text.toString()) }
 		messageBox.setOnEditorActionListener { textView, id, _ ->
@@ -178,10 +193,10 @@ class MainActivity : ThemedActivity() {
 		handleIntent(intent)
 		
 		// Drawer
-		setupDrawer(
+		drawer = setupDrawer(
 			!sharedPreferences.getString("twitch_token", null).isNullOrBlank(),
 			!sharedPreferences.getString("twitch_last_channel", null).isNullOrBlank()
-		).openDrawer()
+		).also { it.openDrawer() }
 	}
 	
 	private fun showSnackbar(messageRes: Int, actionRes: Int? = null, action: ((View) -> Unit)? = null) =
@@ -192,11 +207,18 @@ class MainActivity : ThemedActivity() {
 	
 	private fun showLoggedOffSnackbar() = showSnackbar(R.string.not_logged_in, R.string.action_login) { openTwitchLogin() }
 	
+	private var loggedItem: PrimaryDrawerItem? = null
+	private var connectSelfItem: PrimaryDrawerItem? = null
+	private var connectLastItem: PrimaryDrawerItem? = null
+	private var connectCustomItem: PrimaryDrawerItem? = null
+	
+	private lateinit var drawer: Drawer
+	
 	@Suppress("RedundantCompanionReference")
 	private fun setupDrawer(enableConnect: Boolean = false, enableConnectLast: Boolean = false) =
 		drawer {
 			toolbar = this@MainActivity.toolbar
-			primaryItem(
+			loggedItem = primaryItem(
 				if (enableConnect) "Logged in as ${Companion.sharedPreferences.getString("twitch_username", null)}"
 				else "Logged out"
 			) {
@@ -204,7 +226,7 @@ class MainActivity : ThemedActivity() {
 				selected = false
 			}
 			divider {}
-			primaryItem(getString(R.string.action_connect_self)) {
+			connectSelfItem = primaryItem(getString(R.string.action_connect_self)) {
 				selectable = false
 				selected = false
 				enabled = enableConnect
@@ -213,7 +235,7 @@ class MainActivity : ThemedActivity() {
 					false
 				}
 			}
-			primaryItem(getString(R.string.action_connect_last)) {
+			connectLastItem = primaryItem(getString(R.string.action_connect_last)) {
 				selectable = false
 				selected = false
 				enabled = enableConnect && enableConnectLast
@@ -222,7 +244,7 @@ class MainActivity : ThemedActivity() {
 					false
 				}
 			}
-			primaryItem("Connect to...") {
+			connectCustomItem = primaryItem("Connect to...") {
 				enabled = enableConnect
 				onClick { _ ->
 					openChannelConnectDialog()
@@ -444,11 +466,9 @@ class MainActivity : ThemedActivity() {
 			}?.toMap() ?: mapOf()
 			
 			data["access_token"]?.let { token ->
-				preferences.edit().putString("twitch_token", token).apply()
 				GlobalScope.launch {
-					val username =
-						TwitchAPI.getUsername(clientId, token)
-					preferences.edit().putString("twitch_username", username).apply()
+					val username = TwitchAPI.getUsername(clientId, token)
+					preferences.edit().putString("twitch_token", token).putString("twitch_username", username).apply()
 				}
 			} ?: showSnackbar(R.string.error_login)
 		}
