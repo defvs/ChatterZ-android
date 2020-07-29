@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.otaliastudios.autocomplete.RecyclerViewPresenter
 import dev.defvs.chatterz.R
 import dev.defvs.chatterz.scrollTo
+import io.multimoon.colorful.Colorful
 
 
 class ChatAutoCompletePresenter(
@@ -27,7 +28,7 @@ class ChatAutoCompletePresenter(
 	override fun getPopupDimensions(): PopupDimensions {
 		val dims = PopupDimensions()
 		dims.width = 300
-		dims.height = 800
+		dims.height = 600
 		return dims
 	}
 	
@@ -104,7 +105,7 @@ class ChatAutoCompletePresenter(
 				holder.emoteName.text = data!![position].name
 				holder.root.setOnClickListener { dispatchClick(user) }
 				holder.root.background =
-					if (selected == position) ColorDrawable(Color.parseColor("#22FFFFFF")) else null
+					if (selected == position) ColorDrawable(Color.parseColor(if (Colorful().getDarkTheme()) "#22FFFFFF" else "#22000000")) else null
 			} catch (_: ArrayIndexOutOfBoundsException) {
 			}
 		}

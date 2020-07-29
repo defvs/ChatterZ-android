@@ -172,7 +172,7 @@ class MainActivity : ThemedActivity() {
 		autoComplete = Autocomplete.on<CompletableTwitchEmote>(messageBox)
 			.with(CharPolicy(':', true))
 			.with(autoCompletePresenter)
-			.with(ColorDrawable(Color.parseColor("#77000000")))
+			.with(ColorDrawable(Color.parseColor(if (Colorful().getDarkTheme()) "#000000" else "#FFFFFF")))
 			.with(object : AutocompleteCallback<CompletableTwitchEmote> {
 				override fun onPopupItemClicked(
 					editable: Editable?,
