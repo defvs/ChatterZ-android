@@ -2,6 +2,7 @@ package dev.defvs.chatterz.settings
 
 import android.content.SharedPreferences
 import android.os.Bundle
+import androidx.annotation.Keep
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import dev.defvs.chatterz.MainActivity
@@ -103,18 +104,21 @@ class SettingsActivity : ThemedActivity(),
 		return true
 	}
 	
+	@Keep
 	class HeaderFragment : PreferenceFragmentCompat() {
 		override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
 			setPreferencesFromResource(R.xml.header_preferences, rootKey)
 		}
 	}
 	
+	@Keep
 	class ThemeFragment : PreferenceFragmentCompat() {
 		override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
 			setPreferencesFromResource(R.xml.themes_preferences, rootKey)
 		}
 	}
 	
+	@Keep
 	class DebugFragment : PreferenceFragmentCompat() {
 		override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
 			setPreferencesFromResource(R.xml.debug_preferences, rootKey)

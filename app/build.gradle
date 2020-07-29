@@ -3,6 +3,14 @@ apply plugin: "kotlin-android"
 apply plugin: "kotlin-android-extensions"
 
 android {
+	signingConfigs {
+		release {
+			storeFile file('C:\\Users\\danit\\keystore.jks')
+			storePassword '***REMOVED***'
+			keyAlias '***REMOVED***'
+			keyPassword '***REMOVED***'
+		}
+	}
 	compileSdkVersion 30
 	buildToolsVersion "30.0.0"
 
@@ -29,13 +37,10 @@ android {
 
 	buildTypes {
 		release {
-			minifyEnabled true
-
-			shrinkResources true
-
 			proguardFiles getDefaultProguardFile(
 					'proguard-android-optimize.txt'),
 					'proguard-rules.pro'
+			signingConfig signingConfigs.release
 		}
 
 	}
