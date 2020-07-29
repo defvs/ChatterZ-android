@@ -369,7 +369,9 @@ class MainActivity : ThemedActivity() {
 								)
 							} ?: listOf()
 						autoCompletePresenter.emotes = channelEmotes!!
-					} catch (e: IOException) {Log.w("Emotes", "Fetch failed", e)}
+					} catch (e: IOException) {
+						Log.w("Emotes", "Fetch failed", e)
+					}
 					
 					chatClient = ChatClient(
 						username,
