@@ -1,11 +1,13 @@
 package dev.defvs.chatterz.twitch
 
 import android.util.Log
+import androidx.annotation.Keep
 import com.beust.klaxon.Json
 import com.beust.klaxon.Klaxon
 import dev.defvs.chatterz.openHttps
 import java.net.URL
 
+@Keep
 data class ChannelFFZEmote(
 	val channelEmotes: List<FFZEmote>,
 	val globalEmotes: List<FFZEmote>
@@ -40,10 +42,12 @@ data class ChannelFFZEmote(
 	}
 }
 
+@Keep
 data class FFZRoomResponse(val sets: HashMap<Int, FFZEmoteSet>) {
 	fun getEmotes() = sets.values.flatMap { it.emoticons }
 }
 
+@Keep
 data class FFZGlobalSetResponse(
 	@Json(name = "default_sets") val defaultSetsIds: List<Int>,
 	val sets: HashMap<String, FFZEmoteSet>
@@ -51,8 +55,10 @@ data class FFZGlobalSetResponse(
 	fun getDefaultSets() = sets.filterKeys { it.toInt() in defaultSetsIds }.values.toList()
 }
 
+@Keep
 data class FFZEmoteSet(val emoticons: List<FFZEmote>)
 
+@Keep
 data class FFZEmote(
 	val name: String,
 	val id: Int,

@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import android.text.Spannable
 import android.text.style.ImageSpan
+import androidx.annotation.Keep
 import androidx.core.graphics.scale
 import com.beust.klaxon.Json
 import dev.defvs.chatterz.twitch.*
@@ -14,6 +15,7 @@ import kotlinx.coroutines.launch
 import java.net.URL
 import kotlin.math.roundToInt
 
+@Keep
 data class CompletableTwitchEmote(
 	val name: String,
 	val id: String,
@@ -137,7 +139,10 @@ data class CompletableTwitchEmote(
 	}
 }
 
+@Keep
 data class TwitchEmotesResponse(@Json(name = "emoticon_sets") val emoteSets: Map<String, ArrayList<EmoticonSet>>)
+@Keep
 data class EmoticonSet(val code: String, val id: Int)
 
+@Keep
 enum class EmoteType { FFZ, BTTV, TWITCH }
