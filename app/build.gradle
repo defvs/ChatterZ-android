@@ -37,10 +37,10 @@ android {
 
 	buildTypes {
 		release {
-			minifyEnabled = true
+			/*minifyEnabled = true
 			proguardFiles getDefaultProguardFile(
 					'proguard-android-optimize.txt'),
-					'proguard-rules.pro'
+					'proguard-rules.pro'*/
 			signingConfig signingConfigs.release
 		}
 
@@ -71,6 +71,7 @@ dependencies {
 	implementation "com.beust:klaxon:5.2"
 	implementation "com.otaliastudios:autocomplete:1.1.0"
 	implementation 'co.zsmb:materialdrawer-kt:3.0.0'
+	implementation 'com.balsikandar.android:crashreporter:1.1.0'
 
 	coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:1.0.10"
 }
