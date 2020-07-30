@@ -71,22 +71,27 @@ data class CompletableTwitchEmote(
 			parseTwitchEmotes: Boolean
 		): Spannable {
 			this.filter { it.type == EmoteType.BTTV || it.type == EmoteType.FFZ || (parseTwitchEmotes && it.type == EmoteType.TWITCH)}.forEach {
-				spannable.mapIndexed { index, _ -> spannable.indexOf(it.name, index) }
-					.filter { it in 0 until spannable.length }.forEach { start ->
-						val emote = it.getDrawable(
-							context,
-							apiSize,
-							width
-						)
-						val image = ImageSpan(emote, ImageSpan.ALIGN_BASELINE)
-						val end = start + it.name.length
-						spannable.setSpan(
-							image,
-							start,
-							end,
-							Spannable.SPAN_INCLUSIVE_EXCLUSIVE
-						)
-					}
+				val spacePositions = arrayListOf(0)
+				spannable.forEachIndexed {i, c -> if (c == ' ') spacePositions += (i + 1) }
+				spannable.split(" ").forEachIndexed { index, s ->
+					if (s != it.name) return@forEachIndexed
+					val emote = it.getDrawable(
+						context,
+						apiSize,
+						width
+					)
+					val image = ImageSpan(emote, ImageSpan.ALIGN_BASELINE)
+					
+					val start = spacePositions[index]
+					val end = start + it.name.length
+					
+					spannable.setSpan(
+						image,
+						start,
+						end,
+						Spannable.SPAN_INCLUSIVE_EXCLUSIVE
+					)
+				}
 			}
 			return spannable
 		}
@@ -141,6 +146,7 @@ data class CompletableTwitchEmote(
 
 @Keep
 data class TwitchEmotesResponse(@Json(name = "emoticon_sets") val emoteSets: Map<String, ArrayList<EmoticonSet>>)
+
 @Keep
 data class EmoticonSet(val code: String, val id: Int)
 
