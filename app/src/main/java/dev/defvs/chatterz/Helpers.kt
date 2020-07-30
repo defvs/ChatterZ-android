@@ -59,3 +59,5 @@ fun URL.openHttps(): HttpsURLConnection = this.openConnection().asHttps()
 
 fun Drawer.updateItems(vararg items: PrimaryDrawerItem?) =
 	items.forEach { if (it != null) this.updateItem(it) }
+
+inline fun runAndNull(action: () -> Unit) = action().let { null }

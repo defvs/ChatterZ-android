@@ -31,6 +31,7 @@ class ChatClient(
 	suspend fun getMessageSpannable(
 		context: Context,
 		message: TwitchMessage,
+		apiKey: String,
 		width: Int?
 	): Spannable {
 		with(message) {
@@ -74,7 +75,9 @@ class ChatClient(
 			emoteSpan = tags.find { it.name == "emotes" }?.data?.let { Emotes(it) }
 				?.getEmotedSpannable(context, emoteSpan, width) ?: emoteSpan
 			
-			emoteSpan = emotes.getEmoteSpannable(context, emoteSpan, width, parseTwitchEmotes = true)
+			emoteSpan = emotes.getEmoteSpannable(context, emoteSpan, width, parseTwitchEmotes = isOwnMessage)
+			
+			if (hasBits) BitsEmotes.getEmoteSpannable(emoteSpan, context, apiKey, width)
 			
 			if (isAction && color != null)
 				spannable.color(color) { append(emoteSpan) }

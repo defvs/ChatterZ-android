@@ -533,6 +533,7 @@ class ChatAdapter(
 				val spannable = chatClient?.getMessageSpannable(
 					context,
 					messages[i],
+					context.getString(R.string.twitch_client_id),
 					width = (56 * (preferences.getInt(
 						"textsize_multiplier",
 						100

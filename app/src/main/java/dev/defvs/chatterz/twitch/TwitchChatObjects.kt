@@ -9,7 +9,8 @@ data class TwitchMessage(
 	val isChatEvent: Boolean = false,
 	val isOwnMessage: Boolean = false
 ) {
-	var isAction: Boolean
+	val isAction: Boolean
+	val hasBits: Boolean = !( tags.find { it.name == "bits" }?.data ).isNullOrBlank()
 	
 	constructor(sender: String, message: String, tags: List<TwitchMessageTag>, isChatEvent: Boolean = false) : this(
 		TwitchUser(
