@@ -31,6 +31,7 @@ import com.otaliastudios.autocomplete.Autocomplete
 import com.otaliastudios.autocomplete.AutocompleteCallback
 import com.otaliastudios.autocomplete.CharPolicy
 import dev.defvs.chatterz.MainActivity.Companion.chatClient
+import dev.defvs.chatterz.ads.AdsLoader
 import dev.defvs.chatterz.autocomplete.ChatAutoCompletePresenter
 import dev.defvs.chatterz.autocomplete.CompletableTwitchEmote
 import dev.defvs.chatterz.settings.SettingsActivity
@@ -201,6 +202,10 @@ class MainActivity : ThemedActivity() {
 			!sharedPreferences.getString("twitch_token", null).isNullOrBlank(),
 			!sharedPreferences.getString("twitch_last_channel", null).isNullOrBlank()
 		).also { it.openDrawer() }
+		
+		// Ads
+		AdsLoader.initializeAds(this)
+		AdsLoader.initializeAdView(this)
 	}
 	
 	private fun showSnackbar(messageRes: Int, actionRes: Int? = null, action: ((View) -> Unit)? = null) =
