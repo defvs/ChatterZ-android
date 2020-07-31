@@ -1,13 +1,15 @@
 package dev.defvs.chatterz.twitch
 
 import dev.defvs.chatterz.nullIfEmpty
+import java.util.*
 
 data class TwitchMessage(
 	val sender: TwitchUser,
 	var message: String,
 	val tags: List<TwitchMessageTag>,
 	val isChatEvent: Boolean = false,
-	val isOwnMessage: Boolean = false
+	val isOwnMessage: Boolean = false,
+	val timestamp: Date = Calendar.getInstance().time
 ) {
 	val isAction: Boolean
 	val hasBits: Boolean = !( tags.find { it.name == "bits" }?.data ).isNullOrBlank()

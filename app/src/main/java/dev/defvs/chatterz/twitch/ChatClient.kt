@@ -15,8 +15,17 @@ import dev.defvs.chatterz.darkenColor
 import dev.defvs.chatterz.lightenColor
 import io.multimoon.colorful.Colorful
 import org.jibble.pircbot.PircBot
+import java.sql.Time
+import java.text.DateFormat
 import java.util.*
 
+data class ChatSpannableConfig(
+	val usernameColor: Boolean = true,
+	val showBadges: Boolean = true,
+	val parseEmotes: Boolean = true,
+	val separator: String = ": ",
+	val timestamp: Date? = null
+)
 
 class ChatClient(
 	val username: String,
@@ -32,6 +41,7 @@ class ChatClient(
 		context: Context,
 		message: TwitchMessage,
 		apiKey: String,
+		spannableConfig: ChatSpannableConfig = ChatSpannableConfig(),
 		width: Int?
 	): Spannable {
 		with(message) {
@@ -44,42 +54,36 @@ class ChatClient(
 				}
 			}
 			
+			spannableConfig.timestamp?.let {
+				spannable.append(DateFormat.getTimeInstance(DateFormat.SHORT).format(it) + " ")
+			}
+			
 			val color =
 				if (Colorful().getDarkTheme()) sender.color?.lightenColor() else sender.color?.darkenColor()
-			tags.find { it.name == "badges" }?.data?.let { Badges(it) }?.let { badges ->
-				if (color != null)
-					spannable.bold {
-						color(color) {
-							append(
-								badges.getBadgedSpannable(
-									context,
-									sender.displayName ?: sender.username,
-									width
-								)
-							)
-						}
-					}
-				else spannable.bold {
-					append(
-						badges.getBadgedSpannable(
-							context,
-							sender.displayName ?: sender.username,
-							width
-						)
-					)
+			tags.find { it.name == "badges" }?.data?.let { Badges(it) }.let { badges ->
+				spannable.bold {
+					val badgesSpannable = if (badges != null && spannableConfig.showBadges) badges.getBadgedSpannable(
+						context,
+						sender.displayName ?: sender.username,
+						width
+					) else sender.displayName ?: sender.username
+					if (color != null && spannableConfig.usernameColor) color(color) { append(badgesSpannable) }
+					else append(badgesSpannable)
 				}
-			} ?: spannable.append(sender.displayName ?: sender.username)
-			spannable.append(": ")
+			}
+			spannable.append(spannableConfig.separator)
 			
-			var emoteSpan = SpannableString(this.message) as Spannable
-			emoteSpan = tags.find { it.name == "emotes" }?.data?.let { Emotes(it) }
-				?.getEmotedSpannable(context, emoteSpan, width) ?: emoteSpan
+			val emoteSpan = if (spannableConfig.parseEmotes) {
+				var emoteSpan = SpannableString(this.message) as Spannable
+				emoteSpan = tags.find { it.name == "emotes" }?.data?.let { Emotes(it) }
+					?.getEmotedSpannable(context, emoteSpan, width) ?: emoteSpan
+				
+				emoteSpan = emotes.getEmoteSpannable(context, emoteSpan, width, parseTwitchEmotes = isOwnMessage)
+				
+				if (hasBits) BitsEmotes.getEmoteSpannable(emoteSpan, context, apiKey, width) else emoteSpan
+			} else SpannableString(this.message)
 			
-			emoteSpan = emotes.getEmoteSpannable(context, emoteSpan, width, parseTwitchEmotes = isOwnMessage)
-			
-			if (hasBits) BitsEmotes.getEmoteSpannable(emoteSpan, context, apiKey, width)
-			
-			if (isAction && color != null)
+			if (isAction && color != null && spannableConfig.usernameColor)
 				spannable.color(color) { append(emoteSpan) }
 			else spannable.append(emoteSpan)
 			
@@ -116,7 +120,8 @@ class ChatClient(
 		
 		when {
 			line.contains("PRIVMSG") || line.contains("USERNOTICE") -> {
-				val message = line.substringAfter("PRIVMSG").substringAfter("USERNOTICE").trim().substringAfter(ircChannel).substringAfter(" :")
+				val message =
+					line.substringAfter("PRIVMSG").substringAfter("USERNOTICE").trim().substringAfter(ircChannel).substringAfter(" :")
 				val sender = line.substringBefore(".tmi.twitch.tv").substringAfterLast("@").trim()
 				receiveMessage(TwitchMessage(sender, message, tags, line.contains("USERNOTICE")))
 			}

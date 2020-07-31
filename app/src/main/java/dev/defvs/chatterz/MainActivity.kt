@@ -35,11 +35,8 @@ import dev.defvs.chatterz.autocomplete.ChatAutoCompletePresenter
 import dev.defvs.chatterz.autocomplete.CompletableTwitchEmote
 import dev.defvs.chatterz.settings.SettingsActivity
 import dev.defvs.chatterz.themes.ThemedActivity
-import dev.defvs.chatterz.twitch.ChatClient
-import dev.defvs.chatterz.twitch.TwitchAPI
+import dev.defvs.chatterz.twitch.*
 import dev.defvs.chatterz.twitch.TwitchAPI.getUserId
-import dev.defvs.chatterz.twitch.TwitchMessage
-import dev.defvs.chatterz.twitch.TwitchUser
 import io.multimoon.colorful.Colorful
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
@@ -47,6 +44,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
+import kotlin.collections.ArrayList
 import kotlin.math.roundToInt
 import dev.defvs.chatterz.MainActivity.Companion.sharedPreferences as preferences
 
@@ -537,7 +535,10 @@ class ChatAdapter(
 					width = (56 * (preferences.getInt(
 						"textsize_multiplier",
 						100
-					) / 100f)).roundToInt()
+					) / 100f)).roundToInt(),
+					spannableConfig = ChatSpannableConfig(
+						timestamp = if (preferences.getBoolean("show_timestamp", false)) messages[i].timestamp else null
+					)
 				)
 				withContext(Dispatchers.Main) {
 					spannable?.let { holder.messageText.text = it }

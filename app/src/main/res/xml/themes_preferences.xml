@@ -1,21 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
-	xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto">
 	<SwitchPreferenceCompat
-		app:key="checkered_lines"
 		app:defaultValue="false"
+		app:key="checkered_lines"
 		app:title="@string/preferences_checkered_lines" />
 	<SwitchPreferenceCompat
 		app:defaultValue="true"
 		app:key="dark_theme"
 		app:title="@string/preferences_dark_theme" />
 	<SeekBarPreference
-		app:defaultValue="100"
-		app:min="20"
 		android:max="400"
-		app:seekBarIncrement="20"
-		app:title="@string/preferences_textsize_multiplier"
+		app:defaultValue="100"
 		app:key="textsize_multiplier"
+		app:min="20"
+		app:seekBarIncrement="20"
 		app:showSeekBarValue="true"
-		/>
+		app:title="@string/preferences_textsize_multiplier" />
+	<SwitchPreferenceCompat
+		app:defaultValue="false"
+		app:key="show_timestamp"
+		app:title="Show mesage timestamps" />
+
 </PreferenceScreen>
