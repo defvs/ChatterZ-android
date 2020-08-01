@@ -99,7 +99,7 @@ object BitsEmotes {
 	private fun List<BitsAction>.getBitsTier(
 		prefix: String,
 		bitsAmount: Int
-	) = find { it.prefix == prefix }?.tiers?.filter { it.minBits <= bitsAmount }?.maxBy { it.minBits.toInt() }
+	) = find { it.prefix.equals(prefix, true) }?.tiers?.filter { it.minBits <= bitsAmount }?.maxBy { it.minBits.toInt() }
 	
 	data class BitsAction(
 		val prefix: String,
