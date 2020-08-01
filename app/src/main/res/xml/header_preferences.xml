@@ -1,13 +1,83 @@
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto">
+	
+	<PreferenceCategory
+		app:icon="@drawable/ic_brush_24"
+		app:title="@string/settings_header_theme">
+		<SwitchPreferenceCompat
+			app:defaultValue="true"
+			app:key="dark_theme"
+			app:title="@string/settings_dark_theme" />
+		<SwitchPreferenceCompat
+			app:defaultValue="false"
+			app:key="checkered_lines"
+			app:title="@string/settings_checkered_lines" />
+	</PreferenceCategory>
+	
+	<PreferenceCategory app:title="@string/settings_header_app_behaviour">
+		<SwitchPreferenceCompat
+			app:defaultValue="false"
+			app:key="auto_connect"
+			app:title="@string/settings_connect_last_on_startup" />
+		<SwitchPreferenceCompat
+			app:defaultValue="true"
+			app:key="auto_drawer"
+			app:title="@string/settings_open_drawer_on_startup" />
+	</PreferenceCategory>
+	
+	<PreferenceCategory
+		app:allowDividerBelow="true"
+		app:icon="@drawable/ic_chat_lines"
+		app:title="@string/settings_header_chat_lines">
+		<SeekBarPreference
+			android:max="400"
+			app:defaultValue="100"
+			app:key="textsize_multiplier"
+			app:min="20"
+			app:seekBarIncrement="20"
+			app:showSeekBarValue="true"
+			app:title="@string/settings_textsize_multiplier" />
+		<SwitchPreferenceCompat
+			app:defaultValue="true"
+			app:key="enable_color"
+			app:title="@string/settings_username_colors" />
+		<SwitchPreferenceCompat
+			app:defaultValue="false"
+			app:key="show_timestamp"
+			app:title="@string/settings_show_timestamps" />
+		<SwitchPreferenceCompat
+			app:defaultValue="true"
+			app:key="enable_emotes"
+			app:title="@string/settings_enable_emotes" />
+		<SwitchPreferenceCompat
+			app:defaultValue="true"
+			app:key="enable_badges"
+			app:title="@string/settings_show_badges" />
+	</PreferenceCategory>
+	
+	<PreferenceCategory
+		app:icon="@drawable/ic_keyboard_24"
+		app:title="@string/settings_header_keyboard_shortcuts">
+		<SwitchPreferenceCompat
+			app:defaultValue="true"
+			app:key="autocomplete_updown_enabled"
+			app:title="@string/settings_updown_autocomplete" />
+		<SwitchPreferenceCompat
+			app:defaultValue="true"
+			app:key="autocomplete_send_enter"
+			app:title="@string/settings_autocomplete_send_enter" />
+		<ListPreference
+			app:defaultValue="enter"
+			app:entries="@array/autocomplete_shortcut_texts"
+			app:entryValues="@array/autocomplete_shortcut_values"
+			app:key="autocomplete_accept_shortcut"
+			app:title="@string/settings_autocomplete_accept_shortcut" />
+	</PreferenceCategory>
 	
 	<Preference
-		app:fragment="dev.defvs.chatterz.settings.SettingsActivity$ThemeFragment"
-		app:icon="@drawable/ic_brush_24"
-		app:key="themes_header"
-		app:title="@string/theme_header" />
-
-	<Preference
+		app:allowDividerAbove="true"
 		app:fragment="dev.defvs.chatterz.settings.SettingsActivity$DebugFragment"
+		app:icon="@drawable/ic_debug_settings"
 		app:key="debug_header"
-		app:title="@string/debug_header" />
+		app:title="@string/settings_header_debug" />
 </PreferenceScreen>

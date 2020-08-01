@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string-array name="autocomplete_shortcut_values" >
+		<item>enter</item>
+		<item>tab</item>
+		<item>none</item>
+	</string-array>
+	<string-array name="autocomplete_shortcut_texts">
+		<item>@string/enter_key</item>
+		<item>@string/tab_key</item>
+		<item>@string/none</item>
+	</string-array>
+</resources>

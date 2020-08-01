@@ -4,11 +4,11 @@
 	<SwitchPreferenceCompat
 		app:defaultValue="false"
 		app:key="checkered_lines"
-		app:title="@string/preferences_checkered_lines" />
+		app:title="@string/settings_checkered_lines" />
 	<SwitchPreferenceCompat
 		app:defaultValue="true"
 		app:key="dark_theme"
-		app:title="@string/preferences_dark_theme" />
+		app:title="@string/settings_dark_theme" />
 	<SeekBarPreference
 		android:max="400"
 		app:defaultValue="100"
@@ -16,7 +16,7 @@
 		app:min="20"
 		app:seekBarIncrement="20"
 		app:showSeekBarValue="true"
-		app:title="@string/preferences_textsize_multiplier" />
+		app:title="@string/settings_textsize_multiplier" />
 	<SwitchPreferenceCompat
 		app:defaultValue="false"
 		app:key="show_timestamp"

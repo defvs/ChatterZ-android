@@ -143,16 +143,21 @@ class MainActivity : ThemedActivity() {
 		messageBox.setOnKeyListener { textView, id, event ->
 			return@setOnKeyListener if (event.action == KeyEvent.ACTION_DOWN) when (id) {
 				in listOf(KeyEvent.KEYCODE_ENTER, KeyEvent.KEYCODE_NUMPAD_ENTER) -> {
-					if (autoComplete.isPopupShowing) autoCompletePresenter.select()
-					else sendMessage((textView as TextView).text.toString())
-					
+					if (autoComplete.isPopupShowing && sharedPreferences.getString("autocomplete_accept_shortcut", "enter") == "enter") autoCompletePresenter.select()
+					else if(sharedPreferences.getBoolean("autocomplete_send_enter", true)) sendMessage((textView as TextView).text.toString())
+					true
+				}
+				KeyEvent.KEYCODE_TAB -> {
+					if (autoComplete.isPopupShowing && sharedPreferences.getString("autocomplete_accept_shortcut", "enter") == "tab") autoCompletePresenter.select()
 					true
 				}
 				KeyEvent.KEYCODE_DPAD_UP -> {
-					autoCompletePresenter.selectionUp(); true
+					if(sharedPreferences.getBoolean("autocomplete_updown_enabled", true)) autoCompletePresenter.selectionUp()
+					true
 				}
 				KeyEvent.KEYCODE_DPAD_DOWN -> {
-					autoCompletePresenter.selectionDown(); true
+					if(sharedPreferences.getBoolean("autocomplete_updown_enabled", true)) autoCompletePresenter.selectionDown()
+					true
 				}
 				else -> false
 			} else false
@@ -198,7 +203,9 @@ class MainActivity : ThemedActivity() {
 		drawer = setupDrawer(
 			!sharedPreferences.getString("twitch_token", null).isNullOrBlank(),
 			!sharedPreferences.getString("twitch_last_channel", null).isNullOrBlank()
-		).also { it.openDrawer() }
+		).also { if (sharedPreferences.getBoolean("auto_drawer", true)) it.openDrawer() }
+		
+		if (sharedPreferences.getBoolean("auto_connect", false)) connectToLastOrOwn()
 	}
 	
 	private fun showSnackbar(messageRes: Int, actionRes: Int? = null, action: ((View) -> Unit)? = null) =
@@ -537,6 +544,9 @@ class ChatAdapter(
 						100
 					) / 100f)).roundToInt(),
 					spannableConfig = ChatSpannableConfig(
+						usernameColor = preferences.getBoolean("enable_color", true),
+						showBadges = preferences.getBoolean("enable_badges", true),
+						parseEmotes = preferences.getBoolean("enable_emotes", true),
 						timestamp = if (preferences.getBoolean("show_timestamp", false)) messages[i].timestamp else null
 					)
 				)

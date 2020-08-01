@@ -111,12 +111,12 @@ class SettingsActivity : ThemedActivity(),
 		}
 	}
 	
-	@Keep
+	/*@Keep
 	class ThemeFragment : PreferenceFragmentCompat() {
 		override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
 			setPreferencesFromResource(R.xml.themes_preferences, rootKey)
 		}
-	}
+	}*/
 	
 	@Keep
 	class DebugFragment : PreferenceFragmentCompat() {
