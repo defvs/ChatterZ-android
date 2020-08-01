@@ -74,6 +74,23 @@
 			app:title="@string/settings_autocomplete_accept_shortcut" />
 	</PreferenceCategory>
 	
+	<PreferenceCategory
+		app:icon="@drawable/ic_filter_24"
+		app:title="@string/settings_header_filters_highlights">
+		<EditTextPreference
+			app:defaultValue=""
+			app:key="highlighted_words"
+			app:title="@string/settings_highlighted_words" />
+		<SwitchPreferenceCompat
+			app:defaultValue="false"
+			app:title="@string/settings_highlight_message_instead"
+			app:key="highlight_message" />
+		<SwitchPreferenceCompat
+			app:defaultValue="true"
+			app:title="@string/settings_highlight_username"
+			app:key="highlight_username" />
+	</PreferenceCategory>
+	
 	<Preference
 		app:allowDividerAbove="true"
 		app:fragment="dev.defvs.chatterz.settings.SettingsActivity$DebugFragment"

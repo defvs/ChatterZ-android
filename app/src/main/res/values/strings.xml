@@ -49,4 +49,8 @@
 	<string name="settings_autocomplete_accept_shortcut">Accept autocomplete keyboard shortcut</string>
 	<string name="settings_header_keyboard_shortcuts">Keyboard shortcuts</string>
 	<string name="settings_show_badges">Show badges</string>
+	<string name="settings_header_filters_highlights">Filters and highlights</string>
+	<string name="settings_highlighted_words">Highlighted words (one per line)</string>
+	<string name="settings_highlight_message_instead">Highlight all the message instead of the word</string>
+	<string name="settings_highlight_username">Highlight your username</string>
 </resources>

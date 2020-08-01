@@ -1,21 +1,19 @@
 package dev.defvs.chatterz.twitch
 
 import android.content.Context
+import android.graphics.Color
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.SpannableStringBuilder
+import android.text.style.BackgroundColorSpan
 import android.util.Log
-import androidx.core.text.bold
-import androidx.core.text.color
-import androidx.core.text.toSpannable
-import androidx.core.text.underline
+import androidx.core.text.*
 import dev.defvs.chatterz.autocomplete.CompletableTwitchEmote
 import dev.defvs.chatterz.autocomplete.CompletableTwitchEmote.Companion.getEmoteSpannable
 import dev.defvs.chatterz.darkenColor
 import dev.defvs.chatterz.lightenColor
 import io.multimoon.colorful.Colorful
 import org.jibble.pircbot.PircBot
-import java.sql.Time
 import java.text.DateFormat
 import java.util.*
 
@@ -24,7 +22,8 @@ data class ChatSpannableConfig(
 	val showBadges: Boolean = true,
 	val parseEmotes: Boolean = true,
 	val separator: String = ": ",
-	val timestamp: Date? = null
+	val timestamp: Date? = null,
+	val highlightedWords: List<String>? = null
 )
 
 class ChatClient(
@@ -86,6 +85,12 @@ class ChatClient(
 			if (isAction && color != null && spannableConfig.usernameColor)
 				spannable.color(color) { append(emoteSpan) }
 			else spannable.append(emoteSpan)
+			
+			spannableConfig.highlightedWords?.forEach {
+				it.toRegex().findAll(spannable).forEach {
+					spannable[it.range.first..(it.range.last + 1)] = BackgroundColorSpan(Color.parseColor("#88FF0000"))
+				}
+			}
 			
 			return spannable.toSpannable()
 		}

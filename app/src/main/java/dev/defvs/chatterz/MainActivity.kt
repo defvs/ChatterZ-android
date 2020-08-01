@@ -533,8 +533,14 @@ class ChatAdapter(
 						"$sender: $message"
 			else "$sender: $message"
 		}
+		
+		val highlightedWords = arrayListOf<String>()
+		highlightedWords.addAll(preferences.getString("highlighted_words", null)?.split('\n') ?: listOf())
+		val highlightMessage = preferences.getBoolean("highlight_message", false)
+		
 		GlobalScope.launch {
 			try {
+				if (preferences.getBoolean("highlight_username", true)) chatClient?.username?.let { highlightedWords.add(it) }
 				val spannable = chatClient?.getMessageSpannable(
 					context,
 					messages[i],
@@ -547,7 +553,8 @@ class ChatAdapter(
 						usernameColor = preferences.getBoolean("enable_color", true),
 						showBadges = preferences.getBoolean("enable_badges", true),
 						parseEmotes = preferences.getBoolean("enable_emotes", true),
-						timestamp = if (preferences.getBoolean("show_timestamp", false)) messages[i].timestamp else null
+						timestamp = if (preferences.getBoolean("show_timestamp", false)) messages[i].timestamp else null,
+						highlightedWords = if (!highlightMessage) highlightedWords else null
 					)
 				)
 				withContext(Dispatchers.Main) {
@@ -558,14 +565,18 @@ class ChatAdapter(
 				Log.w("SpannableLoader", "Emotes and badges load failed", e)
 			}
 		}
-		if (i % 2 == 0 && preferences.getBoolean("checkered_lines", false))
-			holder.itemView.setBackgroundColor(
-				Color.parseColor(
-					if (Colorful().getDarkTheme()) "#22FFFFFF"
-					else "#22000000"
-				)
+		holder.itemView.setBackgroundColor(
+			Color.parseColor(
+				when {
+					highlightMessage && highlightedWords.any { messages[i].message.contains(it, true) } -> "#44FF0000"
+					preferences.getBoolean("checkered_lines", false) && i % 2 == 0 -> when {
+						Colorful().getDarkTheme() -> "#22FFFFFF"
+						else -> "#22000000"
+					}
+					else -> "#00000000"
+				}
 			)
-		else holder.itemView.setBackgroundColor(Color.parseColor("#00000000"))
+		)
 	}
 	
 	class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
