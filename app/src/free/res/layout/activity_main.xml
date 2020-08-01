@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:ads="http://schemas.android.com/apk/res-auto"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	tools:context=".MainActivity">
+	
+	<androidx.constraintlayout.widget.ConstraintLayout
+		android:id="@+id/contentLayout"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent">
+		
+		<com.google.android.gms.ads.AdView
+			android:id="@+id/adView"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			ads:adSize="BANNER"
+			ads:adUnitId="@string/main_ad_id"
+			app:layout_constraintBottom_toTopOf="@+id/chatRecycler"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintStart_toStartOf="parent"
+			app:layout_constraintTop_toBottomOf="@+id/toolbar" />
+		
+		<EditText
+			android:id="@+id/messageBox"
+			android:layout_width="0dp"
+			android:layout_height="0dp"
+			android:enabled="false"
+			android:hint="@string/message_box_hint"
+			android:imeOptions="actionSend"
+			android:importantForAutofill="no"
+			android:inputType="text"
+			app:layout_constraintBottom_toBottomOf="parent"
+			app:layout_constraintEnd_toStartOf="@+id/sendButton"
+			app:layout_constraintStart_toStartOf="parent"
+			app:layout_constraintTop_toTopOf="@+id/sendButton" />
+		
+		<ImageButton
+			android:id="@+id/sendButton"
+			style="?android:attr/borderlessButtonStyle"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:contentDescription="@string/action_send"
+			android:src="@drawable/ic_send_24"
+			app:layout_constraintBottom_toBottomOf="parent"
+			app:layout_constraintEnd_toEndOf="parent" />
+		
+		<androidx.recyclerview.widget.RecyclerView
+			android:id="@+id/chatRecycler"
+			android:layout_width="0dp"
+			android:layout_height="0dp"
+			app:layout_constraintBottom_toTopOf="@+id/sendButton"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintStart_toStartOf="parent"
+			app:layout_constraintTop_toBottomOf="@+id/adView" />
+		
+		<androidx.appcompat.widget.Toolbar
+			android:id="@+id/toolbar"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:background="?attr/colorPrimary"
+			android:minHeight="?attr/actionBarSize"
+			android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintStart_toStartOf="parent"
+			app:layout_constraintTop_toTopOf="parent" />
+		
+		<TextView
+			android:id="@+id/disconnectedHint"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/disconnected"
+			android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+			app:layout_constraintBottom_toBottomOf="@+id/chatRecycler"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintStart_toStartOf="parent"
+			app:layout_constraintTop_toTopOf="@+id/chatRecycler" />
+		
+		<com.google.android.material.floatingactionbutton.FloatingActionButton
+			android:id="@+id/scrollFab"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginEnd="24dp"
+			android:layout_marginRight="24dp"
+			android:layout_marginBottom="24dp"
+			android:contentDescription="@string/description_enable_autoscroll"
+			android:src="@drawable/ic_scroll_bottom"
+			app:layout_constraintBottom_toBottomOf="@+id/chatRecycler"
+			app:layout_constraintEnd_toEndOf="@+id/chatRecycler" />
+		
+	</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.drawerlayout.widget.DrawerLayout>
