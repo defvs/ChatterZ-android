@@ -2,6 +2,7 @@ package dev.defvs.chatterz
 
 import android.app.AlertDialog
 import android.app.Dialog
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -144,20 +145,32 @@ class MainActivity : ThemedActivity() {
 		messageBox.setOnKeyListener { textView, id, event ->
 			return@setOnKeyListener if (event.action == KeyEvent.ACTION_DOWN) when (id) {
 				in listOf(KeyEvent.KEYCODE_ENTER, KeyEvent.KEYCODE_NUMPAD_ENTER) -> {
-					if (autoComplete.isPopupShowing && sharedPreferences.getString("autocomplete_accept_shortcut", "enter") == "enter") autoCompletePresenter.select()
-					else if(sharedPreferences.getBoolean("autocomplete_send_enter", true)) sendMessage((textView as TextView).text.toString())
+					if (autoComplete.isPopupShowing && sharedPreferences.getString(
+							"autocomplete_accept_shortcut",
+							"enter"
+						) == "enter"
+					) autoCompletePresenter.select()
+					else if (sharedPreferences.getBoolean(
+							"autocomplete_send_enter",
+							true
+						)
+					) sendMessage((textView as TextView).text.toString())
 					true
 				}
 				KeyEvent.KEYCODE_TAB -> {
-					if (autoComplete.isPopupShowing && sharedPreferences.getString("autocomplete_accept_shortcut", "enter") == "tab") autoCompletePresenter.select()
+					if (autoComplete.isPopupShowing && sharedPreferences.getString(
+							"autocomplete_accept_shortcut",
+							"enter"
+						) == "tab"
+					) autoCompletePresenter.select()
 					true
 				}
 				KeyEvent.KEYCODE_DPAD_UP -> {
-					if(sharedPreferences.getBoolean("autocomplete_updown_enabled", true)) autoCompletePresenter.selectionUp()
+					if (sharedPreferences.getBoolean("autocomplete_updown_enabled", true)) autoCompletePresenter.selectionUp()
 					true
 				}
 				KeyEvent.KEYCODE_DPAD_DOWN -> {
-					if(sharedPreferences.getBoolean("autocomplete_updown_enabled", true)) autoCompletePresenter.selectionDown()
+					if (sharedPreferences.getBoolean("autocomplete_updown_enabled", true)) autoCompletePresenter.selectionDown()
 					true
 				}
 				else -> false
@@ -325,6 +338,9 @@ class MainActivity : ThemedActivity() {
 	private var menu: Menu? = null
 	override fun onCreateOptionsMenu(menu: Menu?): Boolean {
 		menuInflater.inflate(R.menu.main_menu, menu)
+		
+		@Suppress("ConstantConditionIf") if (BuildConfig.FLAVOR != "free") menu?.removeItem(R.id.adfree)
+		
 		this.menu = menu
 		return true
 	}
@@ -441,6 +457,19 @@ class MainActivity : ThemedActivity() {
 		}
 		R.id.connect_chat -> {
 			connectToLastOrOwn()
+			true
+		}
+		R.id.adfree -> {
+			try {
+				startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=dev.defvs.chatterz.adfree")))
+			} catch (e: ActivityNotFoundException) {
+				startActivity(
+					Intent(
+						Intent.ACTION_VIEW,
+						Uri.parse("https://play.google.com/store/apps/details?id=dev.defvs.chatterz.adfree")
+					)
+				)
+			}
 			true
 		}
 		else -> super.onOptionsItemSelected(item)

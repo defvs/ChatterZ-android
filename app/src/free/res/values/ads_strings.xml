@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<string name="main_ad_type" translatable="false">BANNER</string>
 	<string name="main_ad_id" translatable="false">ca-app-pub-1742971804098322/9608337723</string>
 </resources>

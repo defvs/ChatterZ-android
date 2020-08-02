@@ -1,11 +1,6 @@
 package dev.defvs.chatterz.twitch
 
-import android.content.Context
-import android.graphics.BitmapFactory
-import android.graphics.drawable.BitmapDrawable
 import android.util.Log
-import androidx.core.graphics.scale
-import com.beust.klaxon.Json
 import com.beust.klaxon.JsonObject
 import com.beust.klaxon.Klaxon
 import com.beust.klaxon.Parser
@@ -13,13 +8,7 @@ import dev.defvs.chatterz.autocomplete.CompletableTwitchEmote
 import dev.defvs.chatterz.autocomplete.EmoteType
 import dev.defvs.chatterz.autocomplete.TwitchEmotesResponse
 import dev.defvs.chatterz.openHttps
-import dev.defvs.chatterz.runAndNull
-import io.multimoon.colorful.Colorful
 import java.net.URL
-import kotlin.math.floor
-import kotlin.math.log10
-import kotlin.math.pow
-import kotlin.math.roundToInt
 
 object TwitchAPI {
 	fun getFromAPI(
@@ -62,6 +51,7 @@ object TwitchAPI {
 		}
 	
 	fun getUsername(apiKey: String, oauthToken: String) = getUserInfo(apiKey, oauthToken)?.string("name")
+	@Suppress("unused")
 	fun getUserIconURL(apiKey: String, oauthToken: String) = getUserInfo(apiKey, oauthToken)?.string("logo")
 	
 	fun getTwitchEmotes(

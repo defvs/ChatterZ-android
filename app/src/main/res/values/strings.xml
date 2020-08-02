@@ -1,15 +1,10 @@
 <resources>
 	<string name="app_name" translatable="false">ChatterZ</string>
-	<string name="menu_settings">Settings</string>
+	
 	<string name="title_activity_settings">Settings</string>
 	<string name="disconnected_from">🚫 Disconnected from %1$s</string>
 	<string name="connected_to">📡 Connected to %1$s</string>
-	<string name="settings_header_theme">App Theme</string>
-	<string name="settings_checkered_lines">Alternate line colors</string>
 	<string name="action_connect">Connect</string>
-	<string name="settings_twitch_token">Twitch OAuth Token</string>
-	<string name="settings_header_debug">Debug Menu</string>
-	<string name="settings_dark_theme">Dark Theme</string>
 	<string name="action_reconnect">Reconnect</string>
 	<string name="no_emotes_found">No emotes found</string>
 	<string name="connecting_to_with_emoji">🕸 Connecting to %1$s</string>
@@ -17,12 +12,9 @@
 	<string name="connecting_to">Connecting to %1$s…</string>
 	<string name="loading_emotes">Loading emotes…</string>
 	<string name="disconnected">Disconnected</string>
-	<string name="settings_textsize_multiplier">Text size multiplier</string>
 	<string name="action_send">Send</string>
 	<string name="message_box_hint">Type your messages here…</string>
 	<string name="action_login">Login</string>
-	<string name="settings_last_channel">Last Channel</string>
-	<string name="settings_twitch_username">Twitch Username</string>
 	<string name="connect_to">Connect to…</string>
 	<string name="action_connect_self">Connect to your channel</string>
 	<string name="action_connect_last">Connect to last channel</string>
@@ -34,6 +26,14 @@
 	<string name="description_enable_autoscroll">Enable Autoscroll</string>
 	<string name="logged_in_as">Logged in as %1$s</string>
 	<string name="logged_out">Logged out</string>
+	<string name="enter_key">Enter</string>
+	<string name="tab_key">Tab</string>
+	<string name="none">None</string>
+	
+	<!-- Settings -->
+	<string name="settings_textsize_multiplier">Text size multiplier</string>
+	<string name="settings_last_channel">Last Channel</string>
+	<string name="settings_twitch_username">Twitch Username</string>
 	<string name="settings_connect_last_on_startup">Connect to last channel on startup</string>
 	<string name="settings_open_drawer_on_startup">Open drawer on startup</string>
 	<string name="settings_header_app_behaviour">App Behaviour</string>
@@ -41,9 +41,11 @@
 	<string name="settings_enable_emotes">Enable emotes</string>
 	<string name="settings_show_timestamps">Show mesage timestamps</string>
 	<string name="settings_username_colors">Show username colors</string>
-	<string name="enter_key">Enter</string>
-	<string name="tab_key">Tab</string>
-	<string name="none">None</string>
+	<string name="settings_header_theme">App Theme</string>
+	<string name="settings_checkered_lines">Alternate line colors</string>
+	<string name="settings_twitch_token">Twitch OAuth Token</string>
+	<string name="settings_header_debug">Debug Menu</string>
+	<string name="settings_dark_theme">Dark Theme</string>
 	<string name="settings_autocomplete_send_enter">Send message with Enter</string>
 	<string name="settings_updown_autocomplete">Up/Down to select in Autocompletion</string>
 	<string name="settings_autocomplete_accept_shortcut">Accept autocomplete keyboard shortcut</string>
@@ -53,4 +55,5 @@
 	<string name="settings_highlighted_words">Highlighted words (one per line)</string>
 	<string name="settings_highlight_message_instead">Highlight all the message instead of the word</string>
 	<string name="settings_highlight_username">Highlight your username</string>
+	<string name="menu_remove_ads">Remove Ads</string>
 </resources>

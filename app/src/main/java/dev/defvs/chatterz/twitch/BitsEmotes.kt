@@ -5,14 +5,11 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.text.Spannable
-import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
 import android.text.style.ImageSpan
 import android.text.style.StyleSpan
 import android.util.Log
 import androidx.core.graphics.scale
-import androidx.core.text.bold
-import androidx.core.text.color
 import com.beust.klaxon.Json
 import com.beust.klaxon.JsonObject
 import com.beust.klaxon.Klaxon
@@ -21,9 +18,6 @@ import dev.defvs.chatterz.openHttps
 import dev.defvs.chatterz.runAndNull
 import io.multimoon.colorful.Colorful
 import java.net.URL
-import kotlin.math.floor
-import kotlin.math.log10
-import kotlin.math.pow
 import kotlin.math.roundToInt
 
 object BitsEmotes {
@@ -74,7 +68,7 @@ object BitsEmotes {
 		return spannable
 	}
 	
-	@Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
+	@Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN", "RemoveRedundantQualifierName")
 	data class BitsTier(
 		@Json("min_bits") val minBits: java.lang.Integer,
 		val id: String,

@@ -4,12 +4,18 @@
 	<item
 		android:id="@+id/settings"
 		android:icon="@drawable/ic_settings_24"
-		android:title="@string/menu_settings"
-		app:showAsAction="always" />
+		android:title="@string/title_activity_settings"
+		app:showAsAction="ifRoom" />
 	
 	<item
 		android:id="@+id/connect_chat"
 		android:icon="@drawable/ic_play_circle_filled_24"
 		android:title="@string/action_connect_last"
-		app:showAsAction="ifRoom" />
+		app:showAsAction="always" />
+	
+	<item
+		android:id="@+id/adfree"
+		android:title="@string/menu_remove_ads"
+		app:showAsAction="never" />
+		
 </menu>
