@@ -79,7 +79,7 @@ class ChatClient(
 				
 				emoteSpan = emotes.getEmoteSpannable(context, emoteSpan, width, parseTwitchEmotes = isOwnMessage)
 				
-				if (hasBits) BitsEmotes.getEmoteSpannable(emoteSpan, context, apiKey, width) else emoteSpan
+				if (!hasBits) BitsEmotes.getEmoteSpannable(emoteSpan, context, apiKey, width) else emoteSpan
 			} else SpannableString(this.message)
 			
 			if (isAction && color != null && spannableConfig.usernameColor)

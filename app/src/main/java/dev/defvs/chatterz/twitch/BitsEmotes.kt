@@ -9,6 +9,7 @@ import android.text.style.ForegroundColorSpan
 import android.text.style.ImageSpan
 import android.text.style.StyleSpan
 import android.util.Log
+import androidx.annotation.Keep
 import androidx.core.graphics.scale
 import com.beust.klaxon.Json
 import com.beust.klaxon.JsonObject
@@ -16,10 +17,14 @@ import com.beust.klaxon.Klaxon
 import com.beust.klaxon.Parser
 import dev.defvs.chatterz.openHttps
 import dev.defvs.chatterz.runAndNull
+import dev.defvs.chatterz.twitch.BitsAction.Companion.getBitsActions
+import dev.defvs.chatterz.twitch.BitsAction.Companion.getBitsEmoteURL
+import dev.defvs.chatterz.twitch.BitsAction.Companion.getBitsTier
 import io.multimoon.colorful.Colorful
 import java.net.URL
 import kotlin.math.roundToInt
 
+@Keep
 object BitsEmotes {
 	
 	fun getEmoteSpannable(
@@ -68,50 +73,6 @@ object BitsEmotes {
 		return spannable
 	}
 	
-	@Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN", "RemoveRedundantQualifierName")
-	data class BitsTier(
-		@Json("min_bits") val minBits: java.lang.Integer,
-		val id: String,
-		val color: String,
-		val images: Map<String, Map<String, Map<String, String>>>,
-		val canCheer: Boolean = true
-	)
-	
-	private fun List<BitsAction>.getBitsEmoteURL(
-		prefix: String,
-		bitsAmount: Int,
-		dark: Boolean,
-		animated: Boolean,
-		scale: String
-	): String? =
-		getBitsTier(prefix, bitsAmount)
-			?.images
-			?.get(if (dark) "dark" else "light")
-			?.get(if (animated) "animated" else "static")
-			?.get(scale)
-	
-	private fun List<BitsAction>.getBitsTier(
-		prefix: String,
-		bitsAmount: Int
-	) = find { it.prefix.equals(prefix, true) }?.tiers?.filter { it.minBits <= bitsAmount }?.maxBy { it.minBits.toInt() }
-	
-	data class BitsAction(
-		val prefix: String,
-		val scales: List<String>,
-		val tiers: List<BitsTier>
-	)
-	
-	private var cachedBitsActions: List<BitsAction>? = null
-	private fun getBitsActions(apiKey: String) =
-		if (cachedBitsActions.isNullOrEmpty())
-			with(TwitchAPI.getFromAPI(URL("https://api.twitch.tv/v5/bits/actions"), apiKey)) {
-				if (responseCode != 200) null else {
-					(Parser.default().parse(inputStream) as JsonObject)
-						.array<JsonObject>("actions")
-						?.let { Klaxon().parseFromJsonArray<BitsAction>(it) }
-				}.also { cachedBitsActions = it }
-			} else cachedBitsActions
-	
 	private fun getTwitchBitsDrawable(context: Context, url: URL, height: Int?): BitmapDrawable? {
 		val bitmap = with(url.openHttps()) {
 			if (responseCode != 200) return null
@@ -147,5 +108,53 @@ object BitsEmotes {
 		val url = URL(bitsAction.getBitsEmoteURL(prefix, quantity, dark, animated, apiSize.toString())
 			?: return runAndNull { Log.w("BitsEmotes", "Failed to get emote URL for $prefix") })
 		return getTwitchBitsDrawable(context, url, width)
+	}
+}
+
+@Keep
+@Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN", "RemoveRedundantQualifierName")
+data class BitsTier(
+	@Json("min_bits") val minBits: java.lang.Integer,
+	val id: String,
+	val color: String,
+	val images: Map<String, Map<String, Map<String, String>>>,
+	val canCheer: Boolean = true
+)
+
+@Keep
+data class BitsAction(
+	val prefix: String,
+	val scales: List<String>,
+	val tiers: List<BitsTier>
+) {
+	companion object {
+		fun List<BitsAction>.getBitsEmoteURL(
+			prefix: String,
+			bitsAmount: Int,
+			dark: Boolean,
+			animated: Boolean,
+			scale: String
+		): String? =
+			getBitsTier(prefix, bitsAmount)
+				?.images
+				?.get(if (dark) "dark" else "light")
+				?.get(if (animated) "animated" else "static")
+				?.get(scale)
+		
+		fun List<BitsAction>.getBitsTier(
+			prefix: String,
+			bitsAmount: Int
+		) = find { it.prefix.equals(prefix, true) }?.tiers?.filter { it.minBits <= bitsAmount }?.maxBy { it.minBits.toInt() }
+		
+		private var cachedBitsActions: List<BitsAction>? = null
+		fun getBitsActions(apiKey: String) =
+			if (cachedBitsActions.isNullOrEmpty())
+				with(TwitchAPI.getFromAPI(URL("https://api.twitch.tv/v5/bits/actions"), apiKey)) {
+					if (responseCode != 200) null else {
+						(Parser.default().parse(inputStream) as JsonObject)
+							.array<JsonObject>("actions")
+							?.let { Klaxon().parseFromJsonArray<BitsAction>(it) }
+					}.also { cachedBitsActions = it }
+				} else cachedBitsActions
 	}
 }
