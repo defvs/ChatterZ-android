@@ -1,3 +1,5 @@
+# Discontinued. Please use DankChat, it's much better.
+
 # ChatterZ
 [Play Store](https://play.google.com/store/apps/details?id=dev.defvs.chatterz) | [Website](https://chatterz.live)
 
